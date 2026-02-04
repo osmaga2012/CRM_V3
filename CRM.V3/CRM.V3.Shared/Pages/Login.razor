@@ -1,0 +1,177 @@
+@page "/login"
+@using CRM.Dtos.Request
+@using CRM.V3.Shared.Interfaces
+@using CRM.V3.Shared.Services
+@layout LoginLayout
+@inject NavigationManager NavigationManager
+
+@inject IAuthService authService
+@inject IFormFactor formFactor
+@inject IPlatformNavigationService Navigation
+
+<div class="fixed inset-0 z-0 overflow-hidden">
+    <div class="absolute inset-0 bg-black/40 z-10"></div>
+    <div class="w-full h-full bg-center bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCzdmkT8Y2bKYiF66FCxHtYKqxmtBnmlWbvuNnW68XR58IEeUP4Bg0dnHqQYmYoM6oLzdN3ID5IxiQVA0ToAKgXsxvYO-JmvEjVkt425EYsZLXa8-OsT4zSwHtS4w1oD5U_87jSlQyMJq-b5QwcV-8Yebl5DtbWBU5VfgZ-WpIG9V2I5TksoBZ5o6CqldxjwopvD01BKATNI74RbTiNGhA9OzMZ5HDrQ_-87ETP6IJSFRU1lEKE1ycb99wSen88TWX2M34YZrfdpnQ_");'>
+    </div>
+</div>
+
+<main class="relative z-20 w-full max-w-[420px] px-6 flex flex-col items-center">
+    <div class="mb-8 flex flex-col items-center">
+        <div class="bg-primary p-3 rounded-xl shadow-lg mb-4">
+            <span class="material-symbols-outlined text-white text-4xl">sailing</span>
+        </div>
+        <h1 class="text-white text-3xl font-bold tracking-tight text-center drop-shadow-md">
+            Portal Marítimo
+        </h1>
+        <p class="text-white/80 text-sm mt-1 font-medium">Gestión de Trámites Navales</p>
+    </div>
+
+    <div class="w-full bg-white dark:bg-slate-900/95 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden border border-white/20">
+        <div class="p-6 sm:p-8">
+            <div class="mb-6">
+                <h2 class="text-[#0d141b] dark:text-white text-xl font-bold">Iniciar Sesión</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Ingrese sus credenciales para continuar.</p>
+            </div>
+
+            <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[#0d141b] dark:text-slate-200 text-sm font-semibold leading-normal">
+                            Correo electrónico o Usuario
+                        </label>
+                        <div class="relative group">
+                            <InputText @bind-Value="loginModel.Email" 
+                                       class="form-input flex w-full rounded-lg text-[#0d141b] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/40 border border-[#cfdbe7] dark:border-slate-700 bg-slate-50 dark:bg-slate-800 h-12 placeholder:text-[#4c739a] p-[15px] text-base font-normal transition-all" 
+                                       placeholder="ejemplo@maritimo.com" />
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[#0d141b] dark:text-slate-200 text-sm font-semibold leading-normal">
+                            Contraseña
+                        </label>
+                        <div class="flex w-full items-stretch rounded-lg group">
+                            <InputText @bind-Value="loginModel.Password" 
+                                       type="@(showPassword ? "text" : "password")"
+                                       class="form-input flex w-full min-w-0 flex-1 rounded-lg text-[#0d141b] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/40 border border-[#cfdbe7] dark:border-slate-700 bg-slate-50 dark:bg-slate-800 h-12 placeholder:text-[#4c739a] p-[15px] rounded-r-none border-r-0 text-base font-normal transition-all" 
+                                       placeholder="••••••••" />
+                            <div class="text-[#4c739a] flex border border-[#cfdbe7] dark:border-slate-700 bg-slate-50 dark:bg-slate-800 items-center justify-center pr-[15px] rounded-r-lg border-l-0">
+                                <span class="material-symbols-outlined cursor-pointer select-none" @onclick="TogglePasswordVisibility">
+                                    @(showPassword ? "visibility_off" : "visibility")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-start">
+                        <a class="text-primary text-sm font-semibold hover:underline decoration-2 underline-offset-4 cursor-pointer" @onclick="HandleForgotPassword">
+                            ¿Olvidó su contraseña?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all mt-6 active:scale-[0.98] flex items-center justify-center gap-2">
+                        <span>Acceder al Portal</span>
+                        <span class="material-symbols-outlined text-[20px]">login</span>
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+
+        <div class="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-t border-slate-100 dark:border-slate-700 text-center">
+            <p class="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">
+                Acceso Autorizado Solamente
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-8 text-center text-white/60 text-xs flex flex-col gap-2 pb-8">
+        <p>© 2024 Autoridad Marítima Nacional. Todos los derechos reservados.</p>
+        <div class="flex justify-center gap-4">
+            <a class="hover:text-white underline cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/terminos")'>Términos</a>
+            <a class="hover:text-white underline cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/soporte")'>Soporte Técnico</a>
+            <a class="hover:text-white underline cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/privacidad")'>Privacidad</a>
+        </div>
+        <p class="mt-2 opacity-40">v2.4.0-build.82</p>
+    </div>
+</main>
+
+@code {
+    //private LoginModel loginModel = new();
+    private LoginRequest loginModel = new();
+    private string Error;
+    private bool showPassword = false;
+    private string? returnUrl;
+
+    protected override void OnInitialized()
+    {
+        // Capturar el ReturnUrl de la query string
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var queryString = uri.Query;
+        
+        if (!string.IsNullOrEmpty(queryString) && queryString.Contains("ReturnUrl="))
+        {
+            var startIndex = queryString.IndexOf("ReturnUrl=") + "ReturnUrl=".Length;
+            var endIndex = queryString.IndexOf("&", startIndex);
+            if (endIndex == -1) endIndex = queryString.Length;
+            returnUrl = Uri.UnescapeDataString(queryString.Substring(startIndex, endIndex - startIndex));
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var result = await authService.LoginAsync(loginModel.Email, loginModel.Password);
+
+            if (result.IsSuccess)
+            {
+                // 1. Esto DEBE actualizar el estado del CustomAuthStateProvider internamente
+                // Si tu authService no lo hace, el Router de Blazor seguirá pensando que eres Anónimo
+
+                await Task.Delay(100); // Pequeño respiro para que el token se asiente en el almacenamiento
+
+                // 2. Navegamos
+                //await Navigation.NavigateToAsync("/");
+                await Navigation.NavigateToAsync("");
+            }
+            else
+            {
+                Error = result.Message ?? "Error al iniciar sesión.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error durante el inicio de sesión: {ex.Message}");
+            Error = $"{ex.Message} - {ex.InnerException.Message}";
+            //throw;
+        }
+
+
+    }
+
+
+    private async Task HandleLogin1()
+    {
+        // Implementar lógica de login aquí
+        // Después del login exitoso, redirigir al ReturnUrl o a home
+        var redirectUrl = !string.IsNullOrEmpty(returnUrl) ? returnUrl : "/";
+        NavigationManager.NavigateTo(redirectUrl, forceLoad: true);
+    }
+
+    private void HandleForgotPassword()
+    {
+        // Implementar lógica de recuperación de contraseña
+        NavigationManager.NavigateTo("/recuperar-password");
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,61 @@
+@inject NavigationManager NavigationManager
+
+<!-- Footer Navigation - Solo en móvil -->
+<footer class="fixed bottom-0 w-full bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-6 py-2 pb-8 z-50 md:hidden">
+    <div class="flex justify-between items-center max-w-md mx-auto">
+        <a class="flex flex-col items-center gap-1 @GetNavItemClass("/cofradia")" href="#" @onclick="NavigateToCofradia" @onclick:preventDefault>
+            <span class="material-symbols-outlined text-[26px]">grid_view</span>
+            <span class="text-[10px] font-bold">Panel</span>
+        </a>
+        <a class="flex flex-col items-center gap-1 @GetNavItemClass("/empresas")" href="#" @onclick="NavigateToEmpresas" @onclick:preventDefault>
+            <span class="material-symbols-outlined text-[26px]">corporate_fare</span>
+            <span class="text-[10px] font-medium">Empresas</span>
+        </a>
+        <a class="flex flex-col items-center gap-1 @GetNavItemClass("/buques")" href="#" @onclick="NavigateToBuques" @onclick:preventDefault>
+            <span class="material-symbols-outlined text-[26px]">directions_boat</span>
+            <span class="text-[10px] font-medium">Buques</span>
+        </a>
+        <a class="flex flex-col items-center gap-1 @GetNavItemClass("/tramites-masivos")" href="#" @onclick="NavigateToTramitesMasivos" @onclick:preventDefault>
+            <span class="material-symbols-outlined text-[26px]">dynamic_feed</span>
+            <span class="text-[10px] font-medium">Masivos</span>
+        </a>
+    </div>
+</footer>
+
+@code {
+    private string currentRoute = "/";
+
+    protected override void OnInitialized()
+    {
+        currentRoute = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        currentRoute = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    private void Navigate(string route)
+    {
+        NavigationManager.NavigateTo(route);
+    }
+
+    private void NavigateToCofradia() => Navigate("/cofradia");
+    private void NavigateToEmpresas() => Navigate("/empresas");
+    private void NavigateToBuques() => Navigate("/buques");
+    private void NavigateToTramitesMasivos() => Navigate("/tramites-masivos");
+
+    private string GetNavItemClass(string route)
+    {
+        return currentRoute.StartsWith(route.TrimStart('/')) 
+            ? "text-primary" 
+            : "text-slate-400 dark:text-slate-500";
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

@@ -1,0 +1,59 @@
+﻿@inherits LayoutComponentBase
+@inject IJSRuntime JS
+@implements IDisposable
+
+@if (_isMobile == null)
+{
+    <div class="flex items-center justify-center h-screen">
+        <p>Cargando interfaz...</p>
+    </div>
+}
+else
+{
+    @* Usamos LayoutView para decirle a Blazor qué Layout aplicar al @Body *@
+    <LayoutView Layout="@(_isMobile == true ? typeof(MovilLayout) : typeof(MainLayout))">
+        @Body
+    </LayoutView>
+}
+
+@code {
+    private bool? _isMobile = null;
+    private DotNetObjectReference<LayoutSelector>? _objRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // 1. Obtener tamaño inicial
+            var dimensions = await JS.InvokeAsync<WindowDimension>("getWindowDimensions");
+            UpdateSize(dimensions.Width);
+
+            // 2. Suscribirse al evento resize de JS
+            _objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("listenForResize", _objRef);
+        }
+    }
+
+    [JSInvokable]
+    public void OnWindowResize(int width)
+    {
+        UpdateSize(width);
+    }
+
+    private void UpdateSize(int width)
+    {
+        var newValue = width < 768;
+        if (_isMobile != newValue)
+        {
+            _isMobile = newValue;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        _objRef?.Dispose();
+    }
+
+    public class WindowDimension { public int Width { get; set; } }
+}

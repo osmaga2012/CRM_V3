@@ -1,0 +1,16 @@
+﻿@code {
+    [Parameter]
+    public string TipoUsuario { get; set; } = string.Empty;
+
+    [Inject] NavigationManager Navigation { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        if (TipoUsuario == "ClienteEmpresa")
+            Navigation.NavigateTo("crear-perfil-empresa");
+        else if (TipoUsuario == "ClientePersona")
+            Navigation.NavigateTo("crear-perfil-persona");
+        else
+            Navigation.NavigateTo("login");
+    }
+}

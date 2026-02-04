@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="../CRM/CRM.Dtos/CRM.Dtos.csproj" />
+  <Project Path="CRM.V3/CRM.V3.Shared/CRM.V3.Shared.csproj" />
+  <Project Path="CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj" />
+  <Project Path="CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj" />
+  <Project Path="CRM.V3/CRM.V3/CRM.V3.csproj" />
+</Solution>

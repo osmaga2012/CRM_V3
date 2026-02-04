@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+    <PackageReference Include="BlazorPro.BlazorSize" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.3.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+  </ItemGroup>
+
+    <ItemGroup>
+	    <ProjectReference Include="../CRM_REPO/CRM.Dtos/CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' == 'true'" />
+
+	    <ProjectReference Include="C:\Users\oscar\source\repos\CRM\CRM.Dtos\CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' != 'true'" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Helpers\Traducciones\" />
+    </ItemGroup>
+
+</Project>

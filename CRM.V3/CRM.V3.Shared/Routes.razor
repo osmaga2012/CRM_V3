@@ -1,0 +1,64 @@
+﻿@using System.Diagnostics
+@using CRM.V3.Shared.Pages.Redirect
+
+<Router AppAssembly="typeof(Layout.MainLayout).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+    <Found Context="routeData">
+        @if (IsPublicRoute(routeData))
+        {
+            <!-- Rutas públicas usan RouteView para respetar el layout definido en la página -->
+            <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.LoginLayout)" />
+        }
+        else
+        {
+            <!-- Rutas protegidas usan AuthorizeRouteView con MainLayout -->
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+                <Authorizing>
+                    <div class="flex items-center justify-center h-screen">
+                        <p>Verificando autenticación...</p>
+                    </div>
+                </Authorizing>
+                <NotAuthorized>
+                    @{
+                        Debug.WriteLine($"[Usuario] Usuario: {context.User.Identity}");
+                    }
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        <RedirectToLogin />
+                    }
+                    else
+                    {
+                        <div class="flex items-center justify-center h-screen">
+                            <p>No estás autorizado para acceder a este recurso.</p>
+                        </div>
+                    }
+                </NotAuthorized>
+            </AuthorizeRouteView>
+        }
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>
+
+@code{
+    private bool IsPublicRoute(RouteData routeData)
+    {
+        var page = routeData.PageType.Name;
+        
+        // Lista de páginas públicas que no requieren autenticación
+        var publicPages = new[]
+        {
+            "Login",
+            "Register",
+            "ForgotPassword",
+            "ResetPassword",
+            "NotFound"
+        };
+        
+        return publicPages.Any(p => page.Contains(p, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public class WindowDimension
+    {
+        public int Width { get; set; }
+        public int Height { get; set; }
+    }
+}

@@ -1,0 +1,106 @@
+@inject NavigationManager NavigationManager
+
+<!-- Header -->
+<header class="sticky top-0 z-40 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between px-4 md:px-6 lg:px-8 h-16 md:h-20">
+            <button class="p-2 text-slate-700 dark:text-slate-300 md:hidden" @onclick="ToggleMobileMenu">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            
+            <!-- Logo/Título - Mejorado para desktop -->
+            <div class="flex items-center gap-3">
+                <div class="hidden md:flex bg-primary text-white p-2 rounded-xl cursor-pointer" @onclick="NavigateToHome">
+                    <span class="material-symbols-outlined text-2xl">sailing</span>
+                </div>
+                <div class="flex flex-col cursor-pointer" @onclick="NavigateToHome">
+                    <h1 class="text-base md:text-xl lg:text-2xl font-bold tracking-tight">Panel de Cofradía</h1>
+                    <p class="text-[10px] md:text-xs text-slate-500 font-medium">Gestión Multi-empresa</p>
+                </div>
+            </div>
+
+            <!-- Acciones del header -->
+            <div class="flex items-center gap-2 md:gap-4">
+                <!-- Navegación desktop -->
+                <nav class="hidden md:flex items-center gap-1 mr-4">
+                    <a href="#" @onclick="NavigateToCofradia" @onclick:preventDefault 
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("/cofradia")">
+                        Panel
+                    </a>
+                    <a href="#" @onclick="NavigateToEmpresas" @onclick:preventDefault 
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("/empresas")">
+                        Empresas
+                    </a>
+                    <a href="#" @onclick="NavigateToBuques" @onclick:preventDefault 
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("/buques")">
+                        Buques
+                    </a>
+                    <a href="#" @onclick="NavigateToTramitesMasivos" @onclick:preventDefault 
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("/tramites-masivos")">
+                        Trámites Masivos
+                    </a>
+                </nav>
+
+                <button class="p-2 text-slate-700 dark:text-slate-300 relative hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" @onclick="NavigateToNotificaciones">
+                    <span class="material-symbols-outlined">notifications</span>
+                    @if (notificationCount > 0)
+                    {
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-background-dark"></span>
+                    }
+                </button>
+                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary flex items-center justify-center text-white cursor-pointer hover:bg-primary/90 transition-colors" @onclick="NavigateToPerfil">
+                    <span class="material-symbols-outlined text-sm md:text-base">admin_panel_settings</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+@code {
+    [Parameter] public EventCallback OnToggleMobileMenu { get; set; }
+    
+    private int notificationCount = 3;
+    private string currentRoute = "/";
+
+    protected override void OnInitialized()
+    {
+        currentRoute = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        currentRoute = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    private void ToggleMobileMenu()
+    {
+        OnToggleMobileMenu.InvokeAsync();
+    }
+
+    private void Navigate(string route)
+    {
+        NavigationManager.NavigateTo(route);
+    }
+
+    private void NavigateToHome() => Navigate("/");
+    private void NavigateToCofradia() => Navigate("/cofradia");
+    private void NavigateToEmpresas() => Navigate("/empresas");
+    private void NavigateToBuques() => Navigate("/buques");
+    private void NavigateToTramitesMasivos() => Navigate("/tramites-masivos");
+    private void NavigateToNotificaciones() => Navigate("/notificaciones");
+    private void NavigateToPerfil() => Navigate("/perfil");
+
+    private string GetNavClass(string route)
+    {
+        return currentRoute.StartsWith(route.TrimStart('/')) 
+            ? "bg-primary/10 text-primary" 
+            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

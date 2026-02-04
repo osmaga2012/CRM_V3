@@ -1,0 +1,263 @@
+@page "/cofradia"
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+
+<PageTitle>Panel de Control: Cofradía</PageTitle>
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto">
+    <!-- Stats Cards -->
+    <div class="p-4 md:p-6 lg:p-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <span class="material-symbols-outlined text-primary text-3xl md:text-4xl">corporate_fare</span>
+                <span class="text-[10px] md:text-xs font-bold text-emerald-500">+@stats.EmpresasNuevas</span>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-2">Empresas</p>
+            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@stats.TotalEmpresas</p>
+        </div>
+        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <span class="material-symbols-outlined text-primary text-3xl md:text-4xl">directions_boat</span>
+                <span class="text-[10px] md:text-xs font-bold text-emerald-500">+@stats.BuquesNuevos</span>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-2">Buques Totales</p>
+            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@stats.TotalBuques</p>
+        </div>
+        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <span class="material-symbols-outlined text-amber-500 text-3xl md:text-4xl">pending</span>
+                <span class="text-[10px] md:text-xs font-bold text-slate-400">@tramites.Pendientes</span>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-2">Pendientes</p>
+            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@tramites.Pendientes</p>
+        </div>
+        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <span class="material-symbols-outlined text-emerald-500 text-3xl md:text-4xl">check_circle</span>
+                <span class="text-[10px] md:text-xs font-bold text-emerald-500">@tramites.Completados</span>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-2">Completados</p>
+            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@tramites.Completados</p>
+        </div>
+    </div>
+
+    <!-- Estado Global de Trámites -->
+    <div class="px-4 md:px-6 lg:px-8 mb-6">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 md:p-6 shadow-sm">
+            <h3 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 md:mb-6">Estado Global de Trámites</h3>
+            <div class="flex justify-between items-end gap-2 md:gap-4">
+                <div class="flex flex-col items-center flex-1">
+                    <span class="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">@tramites.Total</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase">Totales</span>
+                    <div class="w-full h-1.5 md:h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
+                        <div class="bg-slate-400 h-full w-full"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center flex-1">
+                    <span class="text-lg md:text-2xl font-bold text-amber-500">@tramites.Pendientes</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase">Pendientes</span>
+                    <div class="w-full h-1.5 md:h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
+                        <div class="bg-amber-500 h-full" style="width: @GetPercentage(tramites.Pendientes, tramites.Total)%"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center flex-1">
+                    <span class="text-lg md:text-2xl font-bold text-primary">@tramites.EnRevision</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase">Revisión</span>
+                    <div class="w-full h-1.5 md:h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
+                        <div class="bg-primary h-full" style="width: @GetPercentage(tramites.EnRevision, tramites.Total)%"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center flex-1">
+                    <span class="text-lg md:text-2xl font-bold text-emerald-500">@tramites.Completados</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase">Listos</span>
+                    <div class="w-full h-1.5 md:h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
+                        <div class="bg-emerald-500 h-full" style="width: @GetPercentage(tramites.Completados, tramites.Total)%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trámite Masivo -->
+    <div class="px-4 md:px-6 lg:px-8 mb-6">
+        <div class="bg-primary/5 dark:bg-primary/10 border-2 border-dashed border-primary/30 rounded-2xl p-5 md:p-6 lg:p-8">
+            <div class="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+                <div class="bg-primary text-white p-2 md:p-3 rounded-lg md:rounded-xl">
+                    <span class="material-symbols-outlined text-2xl md:text-3xl">dynamic_feed</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-base md:text-lg text-slate-900 dark:text-white leading-tight">Trámite Masivo</h3>
+                    <p class="text-xs md:text-sm text-slate-500">Crea trámites para múltiples buques</p>
+                </div>
+            </div>
+            <button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 md:py-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2" @onclick="IniciarTramiteMasivo">
+                <span class="material-symbols-outlined text-lg md:text-xl">bolt</span>
+                <span class="text-sm md:text-base">Iniciar Herramienta Bulk</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Empresas Gestionadas -->
+    <div class="flex items-center justify-between px-4 md:px-6 lg:px-8 pb-3 md:pb-4">
+        <h2 class="text-slate-900 dark:text-white text-lg md:text-xl lg:text-2xl font-bold tracking-tight">Empresas Gestionadas</h2>
+        <button class="text-primary text-xs md:text-sm font-bold uppercase tracking-wide hover:underline" @onclick='() => NavigationManager.NavigateTo("/empresas")'>Ver Todas</button>
+    </div>
+
+    <div class="px-4 md:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        @foreach (var empresa in empresas)
+        {
+            <div class="flex items-center gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 md:p-5 rounded-2xl shadow-sm cursor-pointer hover:shadow-lg hover:border-primary/30 transition-all" @onclick="@(() => NavigateToEmpresaDetalle(empresa.Id))">
+                <div class="bg-slate-100 dark:bg-slate-800 text-slate-500 shrink-0 w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-xl font-bold text-base md:text-lg">
+                    @empresa.Iniciales
+                </div>
+                <div class="flex flex-col flex-1 min-w-0">
+                    <p class="text-slate-900 dark:text-white text-sm md:text-base font-bold leading-tight truncate">@empresa.Nombre</p>
+                    <div class="flex items-center gap-3 mt-1">
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px] md:text-base text-slate-400">directions_boat</span>
+                            <span class="text-xs md:text-sm text-slate-500">@empresa.CantidadBuques buques</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px] md:text-base @GetEstadoColorClass(empresa.Estado)">@GetEstadoIcon(empresa.Estado)</span>
+                            <span class="text-xs md:text-sm text-slate-500">@GetEstadoTexto(empresa.Estado)</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 shrink-0">chevron_right</span>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private StatsModel stats = new()
+    {
+        TotalEmpresas = 24,
+        EmpresasNuevas = 2,
+        TotalBuques = 186,
+        BuquesNuevos = 12
+    };
+
+    private TramitesModel tramites = new()
+    {
+        Total = 432,
+        Pendientes = 28,
+        EnRevision = 84,
+        Completados = 320
+    };
+
+    private List<EmpresaModel> empresas = new()
+    {
+        new EmpresaModel 
+        { 
+            Id = 1, 
+            Nombre = "Pesquera del Mar S.A.", 
+            Iniciales = "PM", 
+            CantidadBuques = 12, 
+            Estado = EstadoEmpresa.Advertencia,
+            TramitesExpirados = 3
+        },
+        new EmpresaModel 
+        { 
+            Id = 2, 
+            Nombre = "Armadores del Norte", 
+            Iniciales = "AN", 
+            CantidadBuques = 45, 
+            Estado = EstadoEmpresa.Ok
+        },
+        new EmpresaModel 
+        { 
+            Id = 3, 
+            Nombre = "Flota Levantina", 
+            Iniciales = "FL", 
+            CantidadBuques = 8, 
+            Estado = EstadoEmpresa.Critico,
+            TramitesCriticos = 1
+        }
+    };
+
+    private void NavigateToEmpresaDetalle(int id)
+    {
+        NavigationManager.NavigateTo($"/empresas/{id}");
+    }
+
+    private void IniciarTramiteMasivo()
+    {
+        NavigationManager.NavigateTo("/tramites-masivos");
+    }
+
+    private double GetPercentage(int value, int total)
+    {
+        if (total == 0) return 0;
+        return Math.Round((double)value / total * 100, 2);
+    }
+
+    private string GetEstadoIcon(EstadoEmpresa estado)
+    {
+        return estado switch
+        {
+            EstadoEmpresa.Ok => "check_circle",
+            EstadoEmpresa.Advertencia => "warning",
+            EstadoEmpresa.Critico => "error",
+            _ => "info"
+        };
+    }
+
+    private string GetEstadoColorClass(EstadoEmpresa estado)
+    {
+        return estado switch
+        {
+            EstadoEmpresa.Ok => "text-emerald-500",
+            EstadoEmpresa.Advertencia => "text-amber-500",
+            EstadoEmpresa.Critico => "text-rose-500",
+            _ => "text-slate-500"
+        };
+    }
+
+    private string GetEstadoTexto(EstadoEmpresa estado)
+    {
+        return estado switch
+        {
+            EstadoEmpresa.Ok => "OK",
+            EstadoEmpresa.Advertencia => $"{empresas.FirstOrDefault(e => e.Estado == estado)?.TramitesExpirados ?? 0} exp.",
+            EstadoEmpresa.Critico => $"{empresas.FirstOrDefault(e => e.Estado == estado)?.TramitesCriticos ?? 0} crit.",
+            _ => "N/A"
+        };
+    }
+
+    // Models
+    public class StatsModel
+    {
+        public int TotalEmpresas { get; set; }
+        public int EmpresasNuevas { get; set; }
+        public int TotalBuques { get; set; }
+        public int BuquesNuevos { get; set; }
+    }
+
+    public class TramitesModel
+    {
+        public int Total { get; set; }
+        public int Pendientes { get; set; }
+        public int EnRevision { get; set; }
+        public int Completados { get; set; }
+    }
+
+    public class EmpresaModel
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Iniciales { get; set; } = string.Empty;
+        public int CantidadBuques { get; set; }
+        public EstadoEmpresa Estado { get; set; }
+        public int TramitesExpirados { get; set; }
+        public int TramitesCriticos { get; set; }
+    }
+
+    public enum EstadoEmpresa
+    {
+        Ok,
+        Advertencia,
+        Critico
+    }
+}
