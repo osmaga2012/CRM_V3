@@ -26,6 +26,14 @@ namespace CRM.V3.Shared.Pages
         private List<string> EmailsAviso = new();
         private bool IsMobile = false;
 
+        // Propiedades de paginación
+        private int _paginaActual = 1;
+        private int _itemsPorPagina = 10;
+        private int TotalPaginas => (int)Math.Ceiling((double)FiltroEmpresas.Count() / _itemsPorPagina);
+        private int TotalRegistros => FiltroEmpresas.Count();
+        private int RegistroInicio => (_paginaActual - 1) * _itemsPorPagina + 1;
+        private int RegistroFin => Math.Min(_paginaActual * _itemsPorPagina, TotalRegistros);
+
         // Propiedad que QuickGrid usará para mostrar los datos filtrados (siempre devuelve IQueryable no nulo)
         protected IQueryable<EmpresasDto> FiltroEmpresas
         {
@@ -37,6 +45,18 @@ namespace CRM.V3.Shared.Pages
                     return source.AsQueryable();
                 }
                 return source.Where(filtroEmpresa).AsQueryable();
+            }
+        }
+
+        // Propiedad para obtener los datos paginados
+        protected IEnumerable<EmpresasDto> EmpresasPaginadas
+        {
+            get
+            {
+                return FiltroEmpresas
+                    .Skip((_paginaActual - 1) * _itemsPorPagina)
+                    .Take(_itemsPorPagina)
+                    .ToList();
             }
         }
 
@@ -143,6 +163,76 @@ namespace CRM.V3.Shared.Pages
 
             //var dialog = DialogService.ShowAsync<CrearUsuario>("Ver y Crear usuarios", parameters, options);
             //var result = (await dialog);
+        }
+
+        #region Métodos de Paginación
+
+        private void IrAPagina(int numeroPagina)
+        {
+            if (numeroPagina >= 1 && numeroPagina <= TotalPaginas)
+            {
+                _paginaActual = numeroPagina;
+                StateHasChanged();
+            }
+        }
+
+        private void PaginaAnterior()
+        {
+            if (_paginaActual > 1)
+            {
+                _paginaActual--;
+                StateHasChanged();
+            }
+        }
+
+        private void PaginaSiguiente()
+        {
+            if (_paginaActual < TotalPaginas)
+            {
+                _paginaActual++;
+                StateHasChanged();
+            }
+        }
+
+        private void CambiarItemsPorPagina(int cantidad)
+        {
+            _itemsPorPagina = cantidad;
+            _paginaActual = 1; // Resetear a la primera página
+            StateHasChanged();
+        }
+
+        // Método para obtener los números de página a mostrar
+        private List<int> ObtenerNumerosPagina()
+        {
+            var paginas = new List<int>();
+            int maxPaginasMostrar = 5;
+            int mitad = maxPaginasMostrar / 2;
+
+            int inicio = Math.Max(1, _paginaActual - mitad);
+            int fin = Math.Min(TotalPaginas, inicio + maxPaginasMostrar - 1);
+
+            // Ajustar el inicio si estamos cerca del final
+            if (fin - inicio < maxPaginasMostrar - 1)
+            {
+                inicio = Math.Max(1, fin - maxPaginasMostrar + 1);
+            }
+
+            for (int i = inicio; i <= fin; i++)
+            {
+                paginas.Add(i);
+            }
+
+            return paginas;
+        }
+
+        #endregion
+
+        // Sobrescribir el cambio de filtro para resetear la paginación
+        private void OnFiltroChanged(string nuevoFiltro)
+        {
+            _filtroBarco = nuevoFiltro;
+            _paginaActual = 1; // Resetear a la primera página cuando se filtra
+            StateHasChanged();
         }
     }
 }

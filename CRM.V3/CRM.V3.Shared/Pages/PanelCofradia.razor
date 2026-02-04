@@ -1,78 +1,120 @@
-@page "/cofradia"
-@attribute [Authorize]
+@page "/"
+@* @attribute [Authorize] *@
 @inject NavigationManager NavigationManager
+@using CRM.Dtos
+@using CRM.V3.Shared.Interfaces
+@inject IApiClient<DashboardDto> servicioDashboard
+@inject IApiClient<EmpresasDto> servicioEmpresas
+@inject IApiClient<BarcosDto> servicioBarcos
+@inject IApiClient<BarcosTramitesDto> servicioBarcosTramites
 
 <PageTitle>Panel de Control: Cofradía</PageTitle>
 
 <!-- Main Content -->
-<div class="max-w-7xl mx-auto">
+<div class="w-full">
     <!-- Stats Cards -->
     <div class="p-4 md:p-6 lg:p-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
-        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-shadow">
+        <!-- Total Empresas -->
+        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-105">
             <div class="flex items-center justify-between">
-                <span class="material-symbols-outlined text-primary text-3xl md:text-4xl">corporate_fare</span>
-                <span class="text-[10px] md:text-xs font-bold text-emerald-500">+@stats.EmpresasNuevas</span>
+                <div class="bg-gradient-to-br from-sky-500 to-blue-600 p-3 rounded-xl shadow-lg">
+                    <span class="material-symbols-outlined text-white text-2xl md:text-3xl">corporate_fare</span>
+                </div>
+                @if (empresasNuevas > 0)
+                {
+                    <span class="text-[10px] md:text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">+@empresasNuevas</span>
+                }
             </div>
-            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-2">Empresas</p>
-            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@stats.TotalEmpresas</p>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3">Empresas Totales</p>
+            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@totalEmpresas</p>
+            <div class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full animate-pulse" style="width: 100%"></div>
+            </div>
         </div>
-        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-shadow">
+
+        <!-- Total Barcos -->
+        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-105">
             <div class="flex items-center justify-between">
-                <span class="material-symbols-outlined text-primary text-3xl md:text-4xl">directions_boat</span>
-                <span class="text-[10px] md:text-xs font-bold text-emerald-500">+@stats.BuquesNuevos</span>
+                <div class="bg-gradient-to-br from-cyan-500 to-teal-600 p-3 rounded-xl shadow-lg">
+                    <span class="material-symbols-outlined text-white text-2xl md:text-3xl">directions_boat</span>
+                </div>
+                @if (barcosNuevos > 0)
+                {
+                    <span class="text-[10px] md:text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">+@barcosNuevos</span>
+                }
             </div>
-            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-2">Buques Totales</p>
-            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@stats.TotalBuques</p>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3">Flota Activa</p>
+            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@totalBarcos</p>
+            <div class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full animate-pulse" style="width: 100%"></div>
+            </div>
         </div>
-        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-shadow">
+
+        <!-- Trámites Activos -->
+        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-105">
             <div class="flex items-center justify-between">
-                <span class="material-symbols-outlined text-amber-500 text-3xl md:text-4xl">pending</span>
-                <span class="text-[10px] md:text-xs font-bold text-slate-400">@tramites.Pendientes</span>
+                <div class="bg-gradient-to-br from-amber-500 to-orange-600 p-3 rounded-xl shadow-lg">
+                    <span class="material-symbols-outlined text-white text-2xl md:text-3xl">description</span>
+                </div>
             </div>
-            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-2">Pendientes</p>
-            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@tramites.Pendientes</p>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3">Trámites Activos</p>
+            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@totalTramites</p>
+            <div class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-amber-500 to-orange-600 rounded-full animate-pulse" style="width: 75%"></div>
+            </div>
         </div>
-        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-shadow">
+
+        <!-- Avisos Programados -->
+        <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-105">
             <div class="flex items-center justify-between">
-                <span class="material-symbols-outlined text-emerald-500 text-3xl md:text-4xl">check_circle</span>
-                <span class="text-[10px] md:text-xs font-bold text-emerald-500">@tramites.Completados</span>
+                <div class="bg-gradient-to-br from-purple-500 to-indigo-600 p-3 rounded-xl shadow-lg">
+                    <span class="material-symbols-outlined text-white text-2xl md:text-3xl">notifications_active</span>
+                </div>
             </div>
-            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-2">Completados</p>
-            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@tramites.Completados</p>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3">Avisos Próximos</p>
+            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@avisosProximos</p>
+            <div class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full animate-pulse" style="width: 60%"></div>
+            </div>
         </div>
     </div>
 
-    <!-- Estado Global de Trámites -->
+    <!-- Resumen de Trámites por Barco -->
     <div class="px-4 md:px-6 lg:px-8 mb-6">
         <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 md:p-6 shadow-sm">
-            <h3 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 md:mb-6">Estado Global de Trámites</h3>
-            <div class="flex justify-between items-end gap-2 md:gap-4">
-                <div class="flex flex-col items-center flex-1">
-                    <span class="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">@tramites.Total</span>
-                    <span class="text-[10px] md:text-xs text-slate-500 uppercase">Totales</span>
-                    <div class="w-full h-1.5 md:h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
-                        <div class="bg-slate-400 h-full w-full"></div>
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">insights</span>
+                    Resumen de Trámites
+                </h3>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="flex flex-col items-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-xl">
+                    <span class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">@totalTramites</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1">Total Trámites</span>
+                    <div class="w-full h-1.5 md:h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-slate-500 h-full w-full rounded-full"></div>
                     </div>
                 </div>
-                <div class="flex flex-col items-center flex-1">
-                    <span class="text-lg md:text-2xl font-bold text-amber-500">@tramites.Pendientes</span>
-                    <span class="text-[10px] md:text-xs text-slate-500 uppercase">Pendientes</span>
-                    <div class="w-full h-1.5 md:h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
-                        <div class="bg-amber-500 h-full" style="width: @GetPercentage(tramites.Pendientes, tramites.Total)%"></div>
+                <div class="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl">
+                    <span class="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">@tramitesVigentes</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1">Vigentes</span>
+                    <div class="w-full h-1.5 md:h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-blue-500 h-full rounded-full" style="width: @GetPercentage(tramitesVigentes, totalTramites)%"></div>
                     </div>
                 </div>
-                <div class="flex flex-col items-center flex-1">
-                    <span class="text-lg md:text-2xl font-bold text-primary">@tramites.EnRevision</span>
-                    <span class="text-[10px] md:text-xs text-slate-500 uppercase">Revisión</span>
-                    <div class="w-full h-1.5 md:h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
-                        <div class="bg-primary h-full" style="width: @GetPercentage(tramites.EnRevision, tramites.Total)%"></div>
+                <div class="flex flex-col items-center p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-xl">
+                    <span class="text-2xl md:text-3xl font-bold text-amber-600 dark:text-amber-400">@tramitesPorVencer</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1">Por Vencer (30d)</span>
+                    <div class="w-full h-1.5 md:h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-amber-500 h-full rounded-full" style="width: @GetPercentage(tramitesPorVencer, totalTramites)%"></div>
                     </div>
                 </div>
-                <div class="flex flex-col items-center flex-1">
-                    <span class="text-lg md:text-2xl font-bold text-emerald-500">@tramites.Completados</span>
-                    <span class="text-[10px] md:text-xs text-slate-500 uppercase">Listos</span>
-                    <div class="w-full h-1.5 md:h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
-                        <div class="bg-emerald-500 h-full" style="width: @GetPercentage(tramites.Completados, tramites.Total)%"></div>
+                <div class="flex flex-col items-center p-4 bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-800/30 rounded-xl">
+                    <span class="text-2xl md:text-3xl font-bold text-rose-600 dark:text-rose-400">@tramitesVencidos</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1">Vencidos</span>
+                    <div class="w-full h-1.5 md:h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-rose-500 h-full rounded-full" style="width: @GetPercentage(tramitesVencidos, totalTramites)%"></div>
                     </div>
                 </div>
             </div>
@@ -81,105 +123,240 @@
 
     <!-- Trámite Masivo -->
     <div class="px-4 md:px-6 lg:px-8 mb-6">
-        <div class="bg-primary/5 dark:bg-primary/10 border-2 border-dashed border-primary/30 rounded-2xl p-5 md:p-6 lg:p-8">
+        <div class="bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 border-2 border-dashed border-primary/30 rounded-2xl p-5 md:p-6 lg:p-8 hover:border-primary/50 transition-all duration-300">
             <div class="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                <div class="bg-primary text-white p-2 md:p-3 rounded-lg md:rounded-xl">
+                <div class="bg-gradient-to-br from-primary to-blue-600 text-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-lg">
                     <span class="material-symbols-outlined text-2xl md:text-3xl">dynamic_feed</span>
                 </div>
                 <div>
                     <h3 class="font-bold text-base md:text-lg text-slate-900 dark:text-white leading-tight">Trámite Masivo</h3>
-                    <p class="text-xs md:text-sm text-slate-500">Crea trámites para múltiples buques</p>
+                    <p class="text-xs md:text-sm text-slate-500">Crea trámites para múltiples buques simultáneamente</p>
                 </div>
             </div>
-            <button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 md:py-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2" @onclick="IniciarTramiteMasivo">
+            <button class="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-bold py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 hover:scale-105 duration-300" @onclick="IniciarTramiteMasivo">
                 <span class="material-symbols-outlined text-lg md:text-xl">bolt</span>
                 <span class="text-sm md:text-base">Iniciar Herramienta Bulk</span>
             </button>
         </div>
     </div>
 
-    <!-- Empresas Gestionadas -->
+    <!-- Últimas Empresas Registradas -->
     <div class="flex items-center justify-between px-4 md:px-6 lg:px-8 pb-3 md:pb-4">
-        <h2 class="text-slate-900 dark:text-white text-lg md:text-xl lg:text-2xl font-bold tracking-tight">Empresas Gestionadas</h2>
-        <button class="text-primary text-xs md:text-sm font-bold uppercase tracking-wide hover:underline" @onclick='() => NavigationManager.NavigateTo("/empresas")'>Ver Todas</button>
+        <h2 class="text-slate-900 dark:text-white text-lg md:text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">business</span>
+            Empresas Recientes
+        </h2>
+        <button class="text-primary text-xs md:text-sm font-bold uppercase tracking-wide hover:underline flex items-center gap-1" @onclick='() => NavigationManager.NavigateTo("/")'>
+            Ver Todas
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </button>
     </div>
 
-    <div class="px-4 md:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-        @foreach (var empresa in empresas)
+    <div class="px-4 md:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6">
+        @if (empresasRecientes != null && empresasRecientes.Any())
         {
-            <div class="flex items-center gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 md:p-5 rounded-2xl shadow-sm cursor-pointer hover:shadow-lg hover:border-primary/30 transition-all" @onclick="@(() => NavigateToEmpresaDetalle(empresa.Id))">
-                <div class="bg-slate-100 dark:bg-slate-800 text-slate-500 shrink-0 w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-xl font-bold text-base md:text-lg">
-                    @empresa.Iniciales
-                </div>
-                <div class="flex flex-col flex-1 min-w-0">
-                    <p class="text-slate-900 dark:text-white text-sm md:text-base font-bold leading-tight truncate">@empresa.Nombre</p>
-                    <div class="flex items-center gap-3 mt-1">
-                        <div class="flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px] md:text-base text-slate-400">directions_boat</span>
-                            <span class="text-xs md:text-sm text-slate-500">@empresa.CantidadBuques buques</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px] md:text-base @GetEstadoColorClass(empresa.Estado)">@GetEstadoIcon(empresa.Estado)</span>
-                            <span class="text-xs md:text-sm text-slate-500">@GetEstadoTexto(empresa.Estado)</span>
+            @foreach (var empresa in empresasRecientes.Take(6))
+            {
+                <div class="flex items-center gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 md:p-5 rounded-2xl shadow-sm cursor-pointer hover:shadow-xl hover:border-primary/50 hover:scale-105 transition-all duration-300" @onclick="@(() => NavigateToEmpresaDetalle(empresa.CodigoEmpresa))">
+                    <div class="bg-gradient-to-br from-primary/10 to-blue-600/10 text-primary shrink-0 w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-xl font-bold text-base md:text-lg shadow-inner">
+                        @GetInicialesEmpresa(empresa.NombreArmador)
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <p class="text-slate-900 dark:text-white text-sm md:text-base font-bold leading-tight truncate">@empresa.NombreArmador</p>
+                        <div class="flex items-center gap-3 mt-1">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px] md:text-base text-primary">directions_boat</span>
+                                <span class="text-xs md:text-sm text-slate-500">@(empresa.Barco != null ? 1 : 0) barco</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px] md:text-base text-slate-400">tag</span>
+                                <span class="text-xs md:text-sm text-slate-500 font-mono">@empresa.CodigoEmpresa</span>
+                            </div>
                         </div>
                     </div>
+                    <span class="material-symbols-outlined text-slate-300 shrink-0">chevron_right</span>
                 </div>
-                <span class="material-symbols-outlined text-slate-300 shrink-0">chevron_right</span>
+            }
+        }
+        else
+        {
+            <div class="col-span-full flex flex-col items-center justify-center py-12 text-slate-400">
+                <span class="material-symbols-outlined text-6xl mb-3">business_center</span>
+                <p class="text-sm">No hay empresas registradas</p>
             </div>
         }
     </div>
+
+    <!-- Próximos Avisos -->
+    @if (proximosAvisos != null && proximosAvisos.Any())
+    {
+        <div class="px-4 md:px-6 lg:px-8 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-slate-900 dark:text-white text-lg md:text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-500">schedule</span>
+                    Próximos Avisos de Trámites
+                </h2>
+            </div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                    @foreach (var aviso in proximosAvisos.Take(5))
+                    {
+                        var diasRestantes = (aviso.FechaAviso.ToDateTime(TimeOnly.MinValue) - DateTime.Now).Days;
+                        var esUrgente = diasRestantes <= 7;
+                        var esProximo = diasRestantes > 7 && diasRestantes <= 30;
+                        
+                        <div class="p-4 md:p-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <div class="flex items-start gap-4">
+                                @if (esUrgente)
+                                {
+                                    <div class="bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 shrink-0 w-12 h-12 flex flex-col items-center justify-center rounded-xl font-bold">
+                                        <span class="text-xs">@aviso.FechaAviso.Day</span>
+                                        <span class="text-[10px] uppercase">@aviso.FechaAviso.ToString("MMM")</span>
+                                    </div>
+                                }
+                                else if (esProximo)
+                                {
+                                    <div class="bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shrink-0 w-12 h-12 flex flex-col items-center justify-center rounded-xl font-bold">
+                                        <span class="text-xs">@aviso.FechaAviso.Day</span>
+                                        <span class="text-[10px] uppercase">@aviso.FechaAviso.ToString("MMM")</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shrink-0 w-12 h-12 flex flex-col items-center justify-center rounded-xl font-bold">
+                                        <span class="text-xs">@aviso.FechaAviso.Day</span>
+                                        <span class="text-[10px] uppercase">@aviso.FechaAviso.ToString("MMM")</span>
+                                    </div>
+                                }
+                                
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div>
+                                            <p class="text-sm md:text-base font-bold text-slate-900 dark:text-white">@aviso.Certificado</p>
+                                            <p class="text-xs md:text-sm text-slate-500 mt-0.5">Barco: @aviso.CodigoBarco</p>
+                                        </div>
+                                        @if (esUrgente)
+                                        {
+                                            <span class="text-[10px] md:text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-2 py-1 rounded-full whitespace-nowrap">
+                                                @(diasRestantes > 0 ? $"En {diasRestantes} días" : "HOY")
+                                            </span>
+                                        }
+                                        else if (esProximo)
+                                        {
+                                            <span class="text-[10px] md:text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-full whitespace-nowrap">
+                                                En @diasRestantes días
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-[10px] md:text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full whitespace-nowrap">
+                                                En @diasRestantes días
+                                            </span>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(aviso.ListaEmailsEnvioAviso))
+                                    {
+                                        <div class="flex items-center gap-1 mt-2">
+                                            <span class="material-symbols-outlined text-xs text-slate-400">mail</span>
+                                            <span class="text-[10px] md:text-xs text-slate-400">@aviso.ListaEmailsEnvioAviso.Split(',').Length email(s)</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
-    private StatsModel stats = new()
-    {
-        TotalEmpresas = 24,
-        EmpresasNuevas = 2,
-        TotalBuques = 186,
-        BuquesNuevos = 12
-    };
+    // Propiedades para estadísticas
+    private int totalEmpresas = 0;
+    private int empresasNuevas = 0;
+    private int totalBarcos = 0;
+    private int barcosNuevos = 0;
+    private int totalTramites = 0;
+    private int tramitesVigentes = 0;
+    private int tramitesPorVencer = 0;
+    private int tramitesVencidos = 0;
+    private int avisosProximos = 0;
 
-    private TramitesModel tramites = new()
-    {
-        Total = 432,
-        Pendientes = 28,
-        EnRevision = 84,
-        Completados = 320
-    };
+    // Colecciones de datos
+    private List<EmpresasDto> empresasRecientes = new();
+    private List<BarcosTramitesDto> proximosAvisos = new();
 
-    private List<EmpresaModel> empresas = new()
+    protected override async Task OnInitializedAsync()
     {
-        new EmpresaModel 
-        { 
-            Id = 1, 
-            Nombre = "Pesquera del Mar S.A.", 
-            Iniciales = "PM", 
-            CantidadBuques = 12, 
-            Estado = EstadoEmpresa.Advertencia,
-            TramitesExpirados = 3
-        },
-        new EmpresaModel 
-        { 
-            Id = 2, 
-            Nombre = "Armadores del Norte", 
-            Iniciales = "AN", 
-            CantidadBuques = 45, 
-            Estado = EstadoEmpresa.Ok
-        },
-        new EmpresaModel 
-        { 
-            Id = 3, 
-            Nombre = "Flota Levantina", 
-            Iniciales = "FL", 
-            CantidadBuques = 8, 
-            Estado = EstadoEmpresa.Critico,
-            TramitesCriticos = 1
+        await CargarDatosPanel();
+    }
+
+    private async Task CargarDatosPanel()
+    {
+        try
+        {
+            // Cargar empresas con include de Barco
+            string[] includesEmpresas = new string[] { "Barco" };
+            var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
+            var empresas = empresasResult?.ToList() ?? new List<EmpresasDto>();
+            
+            totalEmpresas = empresas.Count;
+            
+            // Calcular empresas nuevas (últimos 30 días)
+            var hace30Dias = DateTime.Now.AddDays(-30);
+            empresasNuevas = empresas.Count(e => e.FechaNew >= hace30Dias);
+            
+            // Obtener empresas recientes para mostrar
+            empresasRecientes = empresas
+                .OrderByDescending(e => e.FechaNew)
+                .Take(6)
+                .ToList();
+
+            // Cargar barcos
+            var barcosResult = await servicioBarcos.GetAllAsync("api/Barco", null, null);
+            var barcos = barcosResult?.ToList() ?? new List<BarcosDto>();
+            
+            totalBarcos = barcos.Count;
+            
+            // Calcular barcos nuevos (últimos 30 días)
+            barcosNuevos = barcos.Count(b => b.FechaAlta.HasValue && 
+                b.FechaAlta.Value.ToDateTime(TimeOnly.MinValue) >= hace30Dias);
+
+            // Cargar trámites de barcos
+            var tramitesResult = await servicioBarcosTramites.GetAllAsync("api/BarcoTramite", null, null);
+            var tramites = tramitesResult?.ToList() ?? new List<BarcosTramitesDto>();
+            
+            totalTramites = tramites.Count;
+            
+            // Clasificar trámites por fecha
+            var hoy = DateOnly.FromDateTime(DateTime.Now);
+            var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+            
+            tramitesVigentes = tramites.Count(t => t.FechaFin > hoy);
+            tramitesPorVencer = tramites.Count(t => t.FechaFin > hoy && t.FechaFin <= en30Dias);
+            tramitesVencidos = tramites.Count(t => t.FechaFin <= hoy);
+
+            // Obtener próximos avisos (trámites con fecha de aviso próxima)
+            proximosAvisos = tramites
+                .Where(t => t.FechaAviso >= hoy)
+                .OrderBy(t => t.FechaAviso)
+                .Take(5)
+                .ToList();
+            
+            avisosProximos = proximosAvisos.Count;
+
+            StateHasChanged();
         }
-    };
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar datos del panel: {ex.Message}");
+        }
+    }
 
-    private void NavigateToEmpresaDetalle(int id)
+    private void NavigateToEmpresaDetalle(string codigoEmpresa)
     {
-        NavigationManager.NavigateTo($"/empresas/{id}");
+        NavigationManager.NavigateTo($"/barco/empresa/{codigoEmpresa}/tramites/0");
     }
 
     private void IniciarTramiteMasivo()
@@ -193,71 +370,16 @@
         return Math.Round((double)value / total * 100, 2);
     }
 
-    private string GetEstadoIcon(EstadoEmpresa estado)
+    private string GetInicialesEmpresa(string nombreEmpresa)
     {
-        return estado switch
-        {
-            EstadoEmpresa.Ok => "check_circle",
-            EstadoEmpresa.Advertencia => "warning",
-            EstadoEmpresa.Critico => "error",
-            _ => "info"
-        };
-    }
+        if (string.IsNullOrWhiteSpace(nombreEmpresa))
+            return "??";
 
-    private string GetEstadoColorClass(EstadoEmpresa estado)
-    {
-        return estado switch
-        {
-            EstadoEmpresa.Ok => "text-emerald-500",
-            EstadoEmpresa.Advertencia => "text-amber-500",
-            EstadoEmpresa.Critico => "text-rose-500",
-            _ => "text-slate-500"
-        };
-    }
-
-    private string GetEstadoTexto(EstadoEmpresa estado)
-    {
-        return estado switch
-        {
-            EstadoEmpresa.Ok => "OK",
-            EstadoEmpresa.Advertencia => $"{empresas.FirstOrDefault(e => e.Estado == estado)?.TramitesExpirados ?? 0} exp.",
-            EstadoEmpresa.Critico => $"{empresas.FirstOrDefault(e => e.Estado == estado)?.TramitesCriticos ?? 0} crit.",
-            _ => "N/A"
-        };
-    }
-
-    // Models
-    public class StatsModel
-    {
-        public int TotalEmpresas { get; set; }
-        public int EmpresasNuevas { get; set; }
-        public int TotalBuques { get; set; }
-        public int BuquesNuevos { get; set; }
-    }
-
-    public class TramitesModel
-    {
-        public int Total { get; set; }
-        public int Pendientes { get; set; }
-        public int EnRevision { get; set; }
-        public int Completados { get; set; }
-    }
-
-    public class EmpresaModel
-    {
-        public int Id { get; set; }
-        public string Nombre { get; set; } = string.Empty;
-        public string Iniciales { get; set; } = string.Empty;
-        public int CantidadBuques { get; set; }
-        public EstadoEmpresa Estado { get; set; }
-        public int TramitesExpirados { get; set; }
-        public int TramitesCriticos { get; set; }
-    }
-
-    public enum EstadoEmpresa
-    {
-        Ok,
-        Advertencia,
-        Critico
+        var palabras = nombreEmpresa.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        
+        if (palabras.Length == 1)
+            return palabras[0].Substring(0, Math.Min(2, palabras[0].Length)).ToUpper();
+        
+        return (palabras[0][0].ToString() + palabras[1][0].ToString()).ToUpper();
     }
 }
