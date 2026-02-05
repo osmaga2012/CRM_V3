@@ -46,7 +46,7 @@ jobs:
         run: dotnet restore
 
       - name: Publish App
-        run: dotnet publish CRM.App.Web.Client/CRM.App.Web.Client.csproj -c Release -o release /p:StaticWebAssetsEnabled=true
+        run: dotnet publish CRM.V3.App.Web.Client/CRM.CRM.V3.App.Web.Client.csproj -c Release -o release /p:StaticWebAssetsEnabled=true
 
       - name: Fix for GitHub Pages
         run: |
