@@ -3,10 +3,32 @@
 @inject NavigationManager NavigationManager
 @using CRM.Dtos
 @using CRM.V3.Shared.Interfaces
-@inject IApiClient<DashboardDto> servicioDashboard
 @inject IApiClient<EmpresasDto> servicioEmpresas
 @inject IApiClient<BarcosDto> servicioBarcos
 @inject IApiClient<BarcosTramitesDto> servicioBarcosTramites
+@inject IApiClient<UsuarioDto> servicioUsuarios
+
+@*
+    PANEL DE CONTROL - COFRADÍA
+    ============================
+    
+    Modelo de Datos:
+    - Los trámites (BarcosTramitesDto) NO tienen campo "Estado" en la base de datos
+    - La clasificación de trámites se realiza en tiempo real basándose en fechas:
+      * Vigentes: FechaFin > Hoy
+      * Por Vencer: FechaFin entre Hoy y 30 días
+      * Vencidos: FechaFin <= Hoy
+    
+    Sistema de Avisos:
+    - Los avisos son notificaciones por EMAIL que se envían a los barcos
+    - Se programan mediante el campo FechaAviso en BarcosTramitesDto
+    - Los emails destinatarios se almacenan en ListaEmailsEnvioAviso
+    - NO existe un sistema de estados de trámites, solo gestión por fechas y notificaciones
+    
+    Contador de Trámites:
+    - El total de trámites se obtiene sumando BarcosTramites de todos los barcos
+    - BarcosTramites es una colección (ICollection<BarcosTramitesDto>) en BarcosDto
+*@
 
 <PageTitle>Panel de Control: Cofradía</PageTitle>
 
@@ -35,18 +57,18 @@
         <!-- Total Barcos -->
         <div class="col-span-1 flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-105">
             <div class="flex items-center justify-between">
-                <div class="bg-gradient-to-br from-cyan-500 to-teal-600 p-3 rounded-xl shadow-lg">
-                    <span class="material-symbols-outlined text-white text-2xl md:text-3xl">directions_boat</span>
+                <div class="bg-gradient-to-br from-emerald-500 to-green-600 p-3 rounded-xl shadow-lg">
+                    <span class="material-symbols-outlined text-white text-2xl md:text-3xl">group</span>
                 </div>
-                @if (barcosNuevos > 0)
+                @if (usuariosNuevos > 0)
                 {
-                    <span class="text-[10px] md:text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">+@barcosNuevos</span>
+                    <span class="text-[10px] md:text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">+@usuariosNuevos</span>
                 }
             </div>
-            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3">Flota Activa</p>
-            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@totalBarcos</p>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3">Usuarios Activos</p>
+            <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@totalUsuarios</p>
             <div class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full animate-pulse" style="width: 100%"></div>
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-green-600 rounded-full animate-pulse" style="width: 100%"></div>
             </div>
         </div>
 
@@ -71,8 +93,9 @@
                     <span class="material-symbols-outlined text-white text-2xl md:text-3xl">notifications_active</span>
                 </div>
             </div>
-            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3">Avisos Próximos</p>
+            <p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3">Emails Pendientes</p>
             <p class="text-slate-900 dark:text-white text-2xl md:text-3xl lg:text-4xl font-bold">@avisosProximos</p>
+            <p class="text-[9px] md:text-[10px] text-slate-400 mt-1">Avisos programados por enviar</p>
             <div class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
                 <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full animate-pulse" style="width: 60%"></div>
             </div>
@@ -83,36 +106,39 @@
     <div class="px-4 md:px-6 lg:px-8 mb-6">
         <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 md:p-6 shadow-sm">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">insights</span>
-                    Resumen de Trámites
-                </h3>
+                <div>
+                    <h3 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">insights</span>
+                        Resumen de Trámites por Fecha
+                    </h3>
+                    <p class="text-[10px] md:text-xs text-slate-500 mt-1">Clasificación basada en fechas de vencimiento</p>
+                </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="flex flex-col items-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-xl">
                     <span class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">@totalTramites</span>
-                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1">Total Trámites</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1 text-center">Total Registrados</span>
                     <div class="w-full h-1.5 md:h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-3 overflow-hidden">
                         <div class="bg-slate-500 h-full w-full rounded-full"></div>
                     </div>
                 </div>
                 <div class="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl">
                     <span class="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">@tramitesVigentes</span>
-                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1">Vigentes</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1 text-center">Vigentes Hoy</span>
                     <div class="w-full h-1.5 md:h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-3 overflow-hidden">
                         <div class="bg-blue-500 h-full rounded-full" style="width: @GetPercentage(tramitesVigentes, totalTramites)%"></div>
                     </div>
                 </div>
                 <div class="flex flex-col items-center p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-xl">
                     <span class="text-2xl md:text-3xl font-bold text-amber-600 dark:text-amber-400">@tramitesPorVencer</span>
-                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1">Por Vencer (30d)</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1 text-center">Vencen en 30 días</span>
                     <div class="w-full h-1.5 md:h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-3 overflow-hidden">
                         <div class="bg-amber-500 h-full rounded-full" style="width: @GetPercentage(tramitesPorVencer, totalTramites)%"></div>
                     </div>
                 </div>
                 <div class="flex flex-col items-center p-4 bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-800/30 rounded-xl">
                     <span class="text-2xl md:text-3xl font-bold text-rose-600 dark:text-rose-400">@tramitesVencidos</span>
-                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1">Vencidos</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 uppercase mt-1 text-center">Ya Vencidos</span>
                     <div class="w-full h-1.5 md:h-2 bg-slate-200 dark:bg-slate-600 rounded-full mt-3 overflow-hidden">
                         <div class="bg-rose-500 h-full rounded-full" style="width: @GetPercentage(tramitesVencidos, totalTramites)%"></div>
                     </div>
@@ -130,12 +156,12 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-base md:text-lg text-slate-900 dark:text-white leading-tight">Trámite Masivo</h3>
-                    <p class="text-xs md:text-sm text-slate-500">Crea trámites para múltiples buques simultáneamente</p>
+                    <p class="text-xs md:text-sm text-slate-500">Crea trámites para múltiples centros de trabajo de forma masiva</p>
                 </div>
             </div>
             <button class="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-bold py-3 md:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 hover:scale-105 duration-300" @onclick="IniciarTramiteMasivo">
                 <span class="material-symbols-outlined text-lg md:text-xl">bolt</span>
-                <span class="text-sm md:text-base">Iniciar Herramienta Bulk</span>
+                <span class="text-sm md:text-base">Creación de tramites masivos.</span>
             </button>
         </div>
     </div>
@@ -146,7 +172,7 @@
             <span class="material-symbols-outlined text-primary">business</span>
             Empresas Recientes
         </h2>
-        <button class="text-primary text-xs md:text-sm font-bold uppercase tracking-wide hover:underline flex items-center gap-1" @onclick='() => NavigationManager.NavigateTo("/")'>
+        <button @onclick='() => NavigationManager.NavigateTo("/barcos")' class="text-primary text-xs md:text-sm font-bold uppercase tracking-wide hover:underline flex items-center gap-1">
             Ver Todas
             <span class="material-symbols-outlined text-sm">arrow_forward</span>
         </button>
@@ -166,7 +192,7 @@
                         <div class="flex items-center gap-3 mt-1">
                             <div class="flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[14px] md:text-base text-primary">directions_boat</span>
-                                <span class="text-xs md:text-sm text-slate-500">@(empresa.Barco != null ? 1 : 0) barco</span>
+                                <span class="text-xs md:text-sm text-slate-500">(@empresa.Barco!.CodigoBarco) - @empresa.Barco!.NombreB</span>
                             </div>
                             <div class="flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[14px] md:text-base text-slate-400">tag</span>
@@ -192,10 +218,13 @@
     {
         <div class="px-4 md:px-6 lg:px-8 mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-slate-900 dark:text-white text-lg md:text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-2">
-                    <span class="material-symbols-outlined text-amber-500">schedule</span>
-                    Próximos Avisos de Trámites
-                </h2>
+                <div>
+                    <h2 class="text-slate-900 dark:text-white text-lg md:text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-500">schedule</span>
+                        Próximos Avisos de Trámites
+                    </h2>
+                    <p class="text-xs md:text-sm text-slate-500 mt-1">Notificaciones por email programadas para los barcos</p>
+                </div>
             </div>
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                 <div class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -272,20 +301,23 @@
 </div>
 
 @code {
-    // Propiedades para estadísticas
+    // Propiedades para estadísticas generales
     private int totalEmpresas = 0;
     private int empresasNuevas = 0;
-    private int totalBarcos = 0;
-    private int barcosNuevos = 0;
+    private int totalUsuarios = 0;
+    private int usuariosNuevos = 0;
+    
+    // Propiedades para trámites (basadas en fechas, NO en estados de BD)
     private int totalTramites = 0;
-    private int tramitesVigentes = 0;
-    private int tramitesPorVencer = 0;
-    private int tramitesVencidos = 0;
-    private int avisosProximos = 0;
+    private int tramitesVigentes = 0;        // FechaFin > hoy
+    private int tramitesPorVencer = 0;       // FechaFin entre hoy y 30 días
+    private int tramitesVencidos = 0;        // FechaFin <= hoy
+    private int avisosProximos = 0;          // Cantidad de avisos programados próximos
 
     // Colecciones de datos
     private List<EmpresasDto> empresasRecientes = new();
     private List<BarcosTramitesDto> proximosAvisos = new();
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -296,6 +328,8 @@
     {
         try
         {
+            isLoading = true;
+            
             // Cargar empresas con include de Barco
             string[] includesEmpresas = new string[] { "Barco" };
             var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
@@ -307,50 +341,65 @@
             var hace30Dias = DateTime.Now.AddDays(-30);
             empresasNuevas = empresas.Count(e => e.FechaNew >= hace30Dias);
             
-            // Obtener empresas recientes para mostrar
+            // Obtener empresas recientes para mostrar (ordenadas por fecha de creación)
             empresasRecientes = empresas
                 .OrderByDescending(e => e.FechaNew)
                 .Take(6)
                 .ToList();
 
-            // Cargar barcos
-            var barcosResult = await servicioBarcos.GetAllAsync("api/Barco", null, null);
+            // Cargar usuarios
+            var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuario", null, null);
+            var usuarios = usuariosResult?.ToList() ?? new List<UsuarioDto>();
+            
+            totalUsuarios = usuarios.Count(u => u.Activo); // Solo usuarios activos
+            
+            // Calcular usuarios nuevos (últimos 30 días)
+            usuariosNuevos = usuarios.Count(u => u.Activo && u.FechaRegistro >= hace30Dias);
+
+            // Cargar barcos con include de BarcosTramites para contar trámites
+            string[] includesBarcos = new string[] { "BarcosTramites" };
+            var barcosResult = await servicioBarcos.GetAllAsync("api/Barco", null, includesBarcos);
             var barcos = barcosResult?.ToList() ?? new List<BarcosDto>();
             
-            totalBarcos = barcos.Count;
+            // Contar total de trámites desde BarcosTramites (colección en BarcosDto)
+            totalTramites = barcos.Sum(b => b.BarcosTramites?.Count ?? 0);
             
-            // Calcular barcos nuevos (últimos 30 días)
-            barcosNuevos = barcos.Count(b => b.FechaAlta.HasValue && 
-                b.FechaAlta.Value.ToDateTime(TimeOnly.MinValue) >= hace30Dias);
-
-            // Cargar trámites de barcos
-            var tramitesResult = await servicioBarcosTramites.GetAllAsync("api/BarcoTramite", null, null);
-            var tramites = tramitesResult?.ToList() ?? new List<BarcosTramitesDto>();
-            
-            totalTramites = tramites.Count;
-            
-            // Clasificar trámites por fecha
+            // Clasificar trámites por fecha (sin usar estados de BD)
             var hoy = DateOnly.FromDateTime(DateTime.Now);
             var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
             
-            tramitesVigentes = tramites.Count(t => t.FechaFin > hoy);
-            tramitesPorVencer = tramites.Count(t => t.FechaFin > hoy && t.FechaFin <= en30Dias);
-            tramitesVencidos = tramites.Count(t => t.FechaFin <= hoy);
+            // Obtener todos los trámites de todos los barcos
+            var todosTramites = barcos
+                .SelectMany(b => b.BarcosTramites ?? new List<BarcosTramitesDto>())
+                .ToList();
+            
+            // Vigentes: Trámites cuya fecha fin es posterior a hoy
+            tramitesVigentes = todosTramites.Count(t => t.FechaFin > hoy);
+            
+            // Por vencer: Trámites que vencen en los próximos 30 días
+            tramitesPorVencer = todosTramites.Count(t => t.FechaFin > hoy && t.FechaFin <= en30Dias);
+            
+            // Vencidos: Trámites cuya fecha fin ya pasó
+            tramitesVencidos = todosTramites.Count(t => t.FechaFin <= hoy);
 
             // Obtener próximos avisos (trámites con fecha de aviso próxima)
-            proximosAvisos = tramites
+            // Estos son los avisos que se enviarán por email a los barcos
+            proximosAvisos = todosTramites
                 .Where(t => t.FechaAviso >= hoy)
                 .OrderBy(t => t.FechaAviso)
                 .Take(5)
                 .ToList();
             
-            avisosProximos = proximosAvisos.Count;
+            avisosProximos = todosTramites.Count(t => t.FechaAviso >= hoy);
 
+            isLoading = false;
             StateHasChanged();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al cargar datos del panel: {ex.Message}");
+            isLoading = false;
+            StateHasChanged();
         }
     }
 
