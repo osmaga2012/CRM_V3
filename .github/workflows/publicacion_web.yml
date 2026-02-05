@@ -42,12 +42,12 @@ jobs:
 
       - name: Restore dependencies
         # Entramos en la carpeta donde está el proyecto para que el ../CRM_REPO funcione
-        run: dotnet restore CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj
+        run: dotnet restore CRM_V3/CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj
 
       - name: Publish App
         # Corregido el path del csproj y la ruta de salida
         run: |
-          dotnet publish CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj \
+          dotnet publish CRM_V3/CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj \
           -c Release \
           -o release \
           /p:StaticWebAssetsEnabled=true
