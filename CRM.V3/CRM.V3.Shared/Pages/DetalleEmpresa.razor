@@ -1,0 +1,575 @@
+@page "/empresa/{CodigoEmpresa}"
+@inject NavigationManager NavigationManager
+@using CRM.Dtos
+@using CRM.V3.Shared.Interfaces
+@inject IApiClient<EmpresasDto> servicioEmpresas
+@inject IApiClient<BarcosDto> servicioBarcos
+@inject IApiClient<BarcosTramitesDto> servicioBarcosTramites
+@inject IApiClient<UsuarioDto> servicioUsuarios
+
+@*
+    DETALLE DE EMPRESA
+    ==================
+    
+    Vista para visualizar y gestionar:
+    - Información general de la empresa
+    - Trámites del barco asociado (basados en BarcosTramitesDto)
+    - Usuarios vinculados a la empresa (basados en UsuarioDto)
+    
+    Funcionalidades:
+    - Crear nuevos trámites para el barco
+    - Crear nuevos usuarios asociados a la empresa
+    - Visualizar estado de trámites por fechas (Vigentes, Por Vencer, Vencidos)
+*@
+
+<PageTitle>Empresa: @empresa?.NombreArmador</PageTitle>
+
+@if (isLoading)
+{
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <p class="mt-4 text-slate-600 dark:text-slate-400">Cargando información...</p>
+        </div>
+    </div>
+}
+else if (empresa == null)
+{
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">error</span>
+            <p class="text-xl text-slate-600 dark:text-slate-400">Empresa no encontrada</p>
+            <button @onclick='() => NavigationManager.NavigateTo("/barcos")' 
+                    class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+                Volver al listado
+            </button>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Main Content -->
+    <div class="w-full p-4 md:p-6 lg:p-8">
+        
+        <!-- Header con info de empresa -->
+        <div class="bg-gradient-to-br from-primary/5 to-blue-600/10 dark:from-primary/10 dark:to-blue-900/30 rounded-2xl border-2 border-primary/20 p-6 md:p-8 mb-6 shadow-lg">
+            <div class="flex flex-col md:flex-row md:items-center gap-6">
+                <div class="bg-gradient-to-br from-primary to-blue-600 text-white shrink-0 w-20 h-20 md:w-24 md:h-24 flex items-center justify-center rounded-2xl font-bold text-3xl shadow-xl">
+                    @GetInicialesEmpresa(empresa.NombreArmador)
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-2">
+                                @empresa.NombreArmador
+                            </h1>
+                            <div class="flex flex-wrap items-center gap-4 text-sm md:text-base text-slate-600 dark:text-slate-400">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">tag</span>
+                                    <span class="font-mono font-semibold">@empresa.CodigoEmpresa</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">badge</span>
+                                    <span>@empresa.NIFE</span>
+                                </div>
+                                @if (empresa.Barco != null)
+                                {
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary">directions_boat</span>
+                                        <span>@empresa.Barco.NombreB (@empresa.Barco.Matricula)</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <button @onclick='() => NavigationManager.NavigateTo("/barcos")' 
+                                class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                            <span class="material-symbols-outlined text-3xl">close</span>
+                        </button>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(empresa.Observaciones))
+                    {
+                        <div class="mt-4 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+                            <p class="text-sm text-slate-600 dark:text-slate-400">@empresa.Observaciones</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+            <!-- Total Trámites -->
+            <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-sm hover:shadow-xl transition-all">
+                <div class="bg-gradient-to-br from-slate-500 to-slate-600 p-3 rounded-xl shadow-lg w-fit">
+                    <span class="material-symbols-outlined text-white text-2xl">description</span>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-3">Total Trámites</p>
+                <p class="text-slate-900 dark:text-white text-3xl font-bold">@totalTramites</p>
+            </div>
+
+            <!-- Vigentes -->
+            <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 shadow-sm hover:shadow-xl transition-all">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg w-fit">
+                    <span class="material-symbols-outlined text-white text-2xl">check_circle</span>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-3">Vigentes</p>
+                <p class="text-blue-900 dark:text-blue-200 text-3xl font-bold">@tramitesVigentes</p>
+            </div>
+
+            <!-- Por Vencer -->
+            <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 shadow-sm hover:shadow-xl transition-all">
+                <div class="bg-gradient-to-br from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg w-fit">
+                    <span class="material-symbols-outlined text-white text-2xl">schedule</span>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-3">Por Vencer</p>
+                <p class="text-amber-900 dark:text-amber-200 text-3xl font-bold">@tramitesPorVencer</p>
+            </div>
+
+            <!-- Vencidos -->
+            <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-800/30 shadow-sm hover:shadow-xl transition-all">
+                <div class="bg-gradient-to-br from-rose-500 to-rose-600 p-3 rounded-xl shadow-lg w-fit">
+                    <span class="material-symbols-outlined text-white text-2xl">error</span>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-3">Vencidos</p>
+                <p class="text-rose-900 dark:text-rose-200 text-3xl font-bold">@tramitesVencidos</p>
+            </div>
+        </div>
+
+        <!-- Tabs Section -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <!-- Tab Headers -->
+            <div class="flex border-b border-slate-200 dark:border-slate-800">
+                <button @onclick='() => tabActiva = "tramites"' 
+                        class="flex-1 px-6 py-4 font-bold text-sm md:text-base transition-all @(tabActiva == "tramites" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
+                    <span class="material-symbols-outlined align-middle mr-2">description</span>
+                    Trámites (@totalTramites)
+                </button>
+                <button @onclick='() => tabActiva = "usuarios"' 
+                        class="flex-1 px-6 py-4 font-bold text-sm md:text-base transition-all @(tabActiva == "usuarios" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
+                    <span class="material-symbols-outlined align-middle mr-2">group</span>
+                    Usuarios (@usuariosEmpresa.Count)
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-6">
+                @if (tabActiva == "tramites")
+                {
+                    <!-- Trámites Tab -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
+                            Gestión de Trámites
+                        </h3>
+                        <button @onclick="MostrarFormularioTramite" 
+                                class="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-bold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined">add</span>
+                            Nuevo Trámite
+                        </button>
+                    </div>
+
+                    @if (tramites.Any())
+                    {
+                        <div class="grid gap-3">
+                            @foreach (var tramite in tramites.OrderByDescending(t => t.FechaCreacion))
+                            {
+                                var diasRestantes = (tramite.FechaFin.ToDateTime(TimeOnly.MinValue) - DateTime.Now).Days;
+                                var esVigente = tramite.FechaFin > DateOnly.FromDateTime(DateTime.Now);
+                                var esPorVencer = diasRestantes > 0 && diasRestantes <= 30;
+                                var esVencido = tramite.FechaFin <= DateOnly.FromDateTime(DateTime.Now);
+                                
+                                <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:shadow-lg transition-all @(esVencido ? "bg-rose-50 dark:bg-rose-900/10 border-rose-300" : esPorVencer ? "bg-amber-50 dark:bg-amber-900/10 border-amber-300" : "bg-white dark:bg-slate-800")">
+                                    <div class="flex items-start gap-4">
+                                        <div class="@(esVencido ? "bg-rose-500" : esPorVencer ? "bg-amber-500" : "bg-blue-500") text-white shrink-0 w-14 h-14 flex flex-col items-center justify-center rounded-xl font-bold shadow-lg">
+                                            <span class="text-xs">@tramite.FechaFin.Day</span>
+                                            <span class="text-[10px] uppercase">@tramite.FechaFin.ToString("MMM")</span>
+                                        </div>
+                                        
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <div>
+                                                    <h4 class="font-bold text-slate-900 dark:text-white text-base md:text-lg">
+                                                        @tramite.Certificado
+                                                    </h4>
+                                                    <p class="text-sm text-slate-500 mt-1">
+                                                        Inicio: @tramite.FechaInicio.ToString("dd/MM/yyyy") | 
+                                                        Fin: @tramite.FechaFin.ToString("dd/MM/yyyy")
+                                                    </p>
+                                                    @if (!string.IsNullOrEmpty(tramite.Observaciones))
+                                                    {
+                                                        <p class="text-xs text-slate-400 mt-2">@tramite.Observaciones</p>
+                                                    }
+                                                </div>
+                                                
+                                                @if (esVencido)
+                                                {
+                                                    <span class="text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-900/30 px-3 py-1 rounded-full whitespace-nowrap">
+                                                        Vencido hace @Math.Abs(diasRestantes) días
+                                                    </span>
+                                                }
+                                                else if (esPorVencer)
+                                                {
+                                                    <span class="text-xs font-bold text-amber-600 bg-amber-100 dark:bg-amber-900/30 px-3 py-1 rounded-full whitespace-nowrap">
+                                                        Vence en @diasRestantes días
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-xs font-bold text-blue-600 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full whitespace-nowrap">
+                                                        Vigente
+                                                    </span>
+                                                }
+                                            </div>
+                                            
+                                            @if (!string.IsNullOrEmpty(tramite.ListaEmailsEnvioAviso))
+                                            {
+                                                <div class="flex items-center gap-2 mt-3 text-xs text-slate-500">
+                                                    <span class="material-symbols-outlined text-sm">mail</span>
+                                                    <span>Aviso: @tramite.FechaAviso.ToString("dd/MM/yyyy") | Emails: @tramite.ListaEmailsEnvioAviso.Split(',').Length</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+                            <span class="material-symbols-outlined text-6xl mb-3">description</span>
+                            <p class="text-sm">No hay trámites registrados para este barco</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <!-- Usuarios Tab -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
+                            Usuarios de la Empresa
+                        </h3>
+                        <button @onclick="MostrarFormularioUsuario" 
+                                class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-500/90 hover:to-green-600/90 text-white font-bold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Nuevo Usuario
+                        </button>
+                    </div>
+
+                    @if (usuariosEmpresa.Any())
+                    {
+                        <div class="grid gap-3">
+                            @foreach (var usuario in usuariosEmpresa)
+                            {
+                                <div class="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:shadow-lg transition-all">
+                                    <div class="flex items-center gap-4">
+                                        <div class="bg-gradient-to-br from-emerald-500 to-green-600 text-white shrink-0 w-14 h-14 flex items-center justify-center rounded-xl font-bold text-lg shadow-lg">
+                                            @GetInicialesUsuario(usuario.Nombre, usuario.Apellidos)
+                                        </div>
+                                        
+                                        <div class="flex-1">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <div>
+                                                    <h4 class="font-bold text-slate-900 dark:text-white text-base">
+                                                        @usuario.Nombre @usuario.Apellidos
+                                                    </h4>
+                                                    <div class="flex flex-wrap items-center gap-3 mt-1 text-sm text-slate-500">
+                                                        @if (!string.IsNullOrEmpty(usuario.EMail))
+                                                        {
+                                                            <div class="flex items-center gap-1">
+                                                                <span class="material-symbols-outlined text-xs">mail</span>
+                                                                <span>@usuario.EMail</span>
+                                                            </div>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(usuario.Telefono))
+                                                        {
+                                                            <div class="flex items-center gap-1">
+                                                                <span class="material-symbols-outlined text-xs">phone</span>
+                                                                <span>@usuario.Telefono</span>
+                                                            </div>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(usuario.Rol))
+                                                        {
+                                                            <span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">
+                                                                @usuario.Rol
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                
+                                                <span class="text-xs font-bold @(usuario.Activo ? "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30" : "text-slate-400 bg-slate-100 dark:bg-slate-800") px-3 py-1 rounded-full">
+                                                    @(usuario.Activo ? "Activo" : "Inactivo")
+                                                </span>
+                                            </div>
+                                            
+                                            <div class="flex items-center gap-1 mt-2 text-xs text-slate-400">
+                                                <span class="material-symbols-outlined text-xs">calendar_today</span>
+                                                <span>Registrado: @usuario.FechaRegistro.ToString("dd/MM/yyyy")</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+                            <span class="material-symbols-outlined text-6xl mb-3">group</span>
+                            <p class="text-sm">No hay usuarios registrados para esta empresa</p>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Trámite -->
+    @if (mostrarFormTramite)
+    {
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" @onclick="CerrarFormularioTramite">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" @onclick:stopPropagation>
+                <div class="sticky top-0 bg-gradient-to-r from-primary to-blue-600 p-6 rounded-t-2xl">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined">add_circle</span>
+                            Nuevo Trámite
+                        </h2>
+                        <button @onclick="CerrarFormularioTramite" class="text-white hover:bg-white/20 p-2 rounded-lg transition-all">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <!-- Certificado -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                Certificado / Trámite *
+                            </label>
+                            <input @bind="nuevoTramite.Certificado" 
+                                   type="text" 
+                                   class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                   placeholder="Nombre del certificado o trámite" />
+                        </div>
+
+                        <!-- Fechas -->
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Fecha Inicio *
+                                </label>
+                                <input @bind="nuevoTramite.FechaInicioParser" 
+                                       type="date" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Fecha Fin *
+                                </label>
+                                <input @bind="nuevoTramite.FechaFinParser" 
+                                       type="date" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                            </div>
+                        </div>
+
+                        <!-- Fecha Aviso y Días -->
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Fecha Aviso
+                                </label>
+                                <input @bind="nuevoTramite.FechaAvisoParser" 
+                                       type="date" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Días de Aviso
+                                </label>
+                                <input @bind="nuevoTramite.DiasAvisoTramite" 
+                                       type="number" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                       placeholder="Días antes del vencimiento" />
+                            </div>
+                        </div>
+
+                        <!-- Emails para avisos -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                Emails para Avisos (separados por coma)
+                            </label>
+                            <input @bind="nuevoTramite.ListaEmailsEnvioAviso" 
+                                   type="text" 
+                                   class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                   placeholder="email1@ejemplo.com, email2@ejemplo.com" />
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                Observaciones
+                            </label>
+                            <textarea @bind="nuevoTramite.Observaciones" 
+                                      rows="3"
+                                      class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                      placeholder="Notas adicionales..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex gap-3 mt-6">
+                        <button @onclick="CerrarFormularioTramite" 
+                                class="flex-1 px-6 py-3 border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                            Cancelar
+                        </button>
+                        <button @onclick="GuardarTramite" 
+                                disabled="@(string.IsNullOrWhiteSpace(nuevoTramite.Certificado))"
+                                class="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl hover:from-primary/90 hover:to-blue-600/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg">
+                            Guardar Trámite
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Modal Nuevo Usuario -->
+    @if (mostrarFormUsuario)
+    {
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" @onclick="CerrarFormularioUsuario">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" @onclick:stopPropagation>
+                <div class="sticky top-0 bg-gradient-to-r from-emerald-500 to-green-600 p-6 rounded-t-2xl">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined">person_add</span>
+                            Nuevo Usuario
+                        </h2>
+                        <button @onclick="CerrarFormularioUsuario" class="text-white hover:bg-white/20 p-2 rounded-lg transition-all">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <!-- Nombre y Apellidos -->
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Nombre *
+                                </label>
+                                <input @bind="nuevoUsuario.Nombre" 
+                                       type="text" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                       placeholder="Nombre" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Apellidos *
+                                </label>
+                                <input @bind="nuevoUsuario.Apellidos" 
+                                       type="text" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                       placeholder="Apellidos" />
+                            </div>
+                        </div>
+
+                        <!-- Email y Teléfono -->
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Email *
+                                </label>
+                                <input @bind="nuevoUsuario.EMail" 
+                                       type="email" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                       placeholder="usuario@ejemplo.com" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Teléfono
+                                </label>
+                                <input @bind="nuevoUsuario.Telefono" 
+                                       type="tel" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                       placeholder="+34 600 000 000" />
+                            </div>
+                        </div>
+
+                        <!-- NIF y Rol -->
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    NIF *
+                                </label>
+                                <input @bind="nuevoUsuario.NIFAcceso" 
+                                       type="text" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                       placeholder="12345678A" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Rol
+                                </label>
+                                <select @bind="nuevoUsuario.Rol" 
+                                        class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                                    <option value="Cliente">Cliente</option>
+                                    <option value="Administrador">Administrador</option>
+                                    <option value="Asistente">Asistente</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                Contraseña *
+                            </label>
+                            <input @bind="nuevoUsuario.PasswordHash" 
+                                   type="password" 
+                                   class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                   placeholder="••••••••" />
+                        </div>
+
+                        <!-- Email Avisos -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                Email para Avisos
+                            </label>
+                            <input @bind="nuevoUsuario.EMailAvisos" 
+                                   type="email" 
+                                   class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                   placeholder="avisos@ejemplo.com" />
+                        </div>
+
+                        <!-- Estado Activo -->
+                        <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                            <input @bind="nuevoUsuario.Activo" 
+                                   type="checkbox" 
+                                   id="usuarioActivo"
+                                   class="w-5 h-5 text-emerald-500 border-slate-300 rounded focus:ring-emerald-500" />
+                            <label for="usuarioActivo" class="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                Usuario Activo
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex gap-3 mt-6">
+                        <button @onclick="CerrarFormularioUsuario" 
+                                class="flex-1 px-6 py-3 border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                            Cancelar
+                        </button>
+                        <button @onclick="GuardarUsuario" 
+                                disabled="@(string.IsNullOrWhiteSpace(nuevoUsuario.Nombre) || string.IsNullOrWhiteSpace(nuevoUsuario.NIFAcceso))"
+                                class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl hover:from-emerald-500/90 hover:to-green-600/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg">
+                            Crear Usuario
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

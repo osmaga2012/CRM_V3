@@ -191,7 +191,8 @@ else
                                                 title="Ver Trámites">
                                             <span class="material-symbols-outlined text-lg">description</span>
                                         </button>
-                                        <button class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-all" 
+                                        <button @onclick='() => NavigationManager.NavigateTo($"/empresa/{empresa.CodigoEmpresa}")'
+                                                class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-all" 
                                                 title="Ver Detalle">
                                             <span class="material-symbols-outlined text-lg">visibility</span>
                                         </button>
