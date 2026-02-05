@@ -42,7 +42,7 @@ jobs:
 
       - name: Restore dependencies
         # Entramos en la carpeta donde está el proyecto para que el ../CRM_REPO funcione
-        run: dotnet restore main_repo/CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj
+        run: dotnet restore CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj
 
       - name: Publish App
         # Corregido el path del csproj y la ruta de salida
