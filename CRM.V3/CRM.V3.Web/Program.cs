@@ -1,10 +1,10 @@
 using Blazored.LocalStorage;
 using CRM.App.Web.Client.Services;
+using CRM.V3.Shared;
 using CRM.V3.Shared.Helpers;
 using CRM.V3.Shared.Interfaces;
 using CRM.V3.Shared.Providers;
 using CRM.V3.Shared.Services;
-using CRM.V3.Sharted.Services;
 using CRM.V3.Web.Client.Services;
 using CRM.V3.Web.Components;
 using Microsoft.AspNetCore.Components.Authorization;
