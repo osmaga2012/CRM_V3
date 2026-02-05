@@ -3,7 +3,6 @@ using CRM.App.Web.Client.Services;
 using CRM.V3.Shared.Helpers;
 using CRM.V3.Shared.Interfaces;
 using CRM.V3.Shared.Services;
-using CRM.V3.Sharted.Services;
 using CRM.V3.Web.Client.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using System.Text;
