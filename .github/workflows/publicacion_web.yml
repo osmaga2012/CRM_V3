@@ -24,45 +24,40 @@ jobs:
     steps:
       - name: Checkout CRM_V3
         uses: actions/checkout@v4
+        with:
+          path: main_repo # Metemos el código principal aquí
 
       - name: Checkout Dtos
         uses: actions/checkout@v4
         with:
-          repository: osmaga2012/CRM # El nombre real de tu repo de DTOs
-          path: CRM_REPO # Esto crea la carpeta que espera el .csproj
-          # Si el repo de DTOs es PRIVADO, añade la línea de abajo:
+          repository: osmaga2012/CRM
+          path: CRM_REPO # Los DTOs quedan al lado de main_repo
           token: ${{ secrets.API_TOKEN_GITHUB }}
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x' # Cambia a 7.0 o 9.0 si usas otra versión
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
 
       - name: Restore dependencies
-        run: dotnet restore
+        # Entramos en la carpeta donde está el proyecto para que el ../CRM_REPO funcione
+        run: dotnet restore main_repo/CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj
 
       - name: Publish App
-        run: dotnet publish CRM.V3.App.Web.Client/CRM.CRM.V3.App.Web.Client.csproj -c Release -o release /p:StaticWebAssetsEnabled=true
+        # Corregido el path del csproj y la ruta de salida
+        run: |
+          dotnet publish main_repo/CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj \
+          -c Release \
+          -o release \
+          /p:StaticWebAssetsEnabled=true
 
       - name: Fix for GitHub Pages
         run: |
-          # 1. Crear archivo .nojekyll
+          # El publish manda todo a 'release/wwwroot' en la raíz del runner
           touch release/wwwroot/.nojekyll
-          
-          # 2. Cambiar el base href para el subdirectorio de GitHub Pages
           sed -i '/base href=/c\    <base href="/CRM_V3/" />' release/wwwroot/index.html
-          
-          # 3. Copiar index.html a 404.html para SPA routing
           cp release/wwwroot/index.html release/wwwroot/404.html
-
-      - name: List files (Diagnostic)
-        run: |
-          echo "Contenido de release/wwwroot:"
-          ls -R release/wwwroot
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
