@@ -22,7 +22,7 @@
   </ItemGroup>
 
     <ItemGroup>
-	    <ProjectReference Include="../../../CRM_REPO/CRM.Dtos/CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' == 'true'" />
+	    <ProjectReference Include="$(MSBuildThisFileDirectory)../../../CRM_REPO/CRM.Dtos/CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' == 'true'" />
 
 
 	    <ProjectReference Include="C:\Users\oscar\source\repos\CRM\CRM.Dtos\CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' != 'true'" />
