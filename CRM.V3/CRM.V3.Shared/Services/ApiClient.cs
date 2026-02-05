@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
-namespace CRM.V3.Sharted.Services
+namespace CRM.V3.Shared.Services
 {
     public class ApiClient<TDto> : IApiClient<TDto> where TDto : class
     {
