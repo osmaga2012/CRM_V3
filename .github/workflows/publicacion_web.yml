@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: osmaga2012/CRM # El nombre real de tu repo de DTOs
-          path: ../CRM_REPO # Esto crea la carpeta que espera el .csproj
+          path: CRM_REPO # Esto crea la carpeta que espera el .csproj
           # Si el repo de DTOs es PRIVADO, añade la línea de abajo:
           token: ${{ secrets.API_TOKEN_GITHUB }}
       - name: Setup .NET
