@@ -24,13 +24,18 @@ jobs:
     steps:
       - name: Checkout CRM_V3
         uses: actions/checkout@v4
-        
-      - name: Checkout CRM (Dtos Repository)
+
+      - name: Checkout Dtos
         uses: actions/checkout@v4
         with:
-          repository: osmaga2012/CRM
-          path: CRM
+          repository: osmaga2012/CRM # El nombre real de tu repo de DTOs
+          path: CRM_REPO # Esto crea la carpeta que espera el .csproj
+          # Si el repo de DTOs es PRIVADO, añade la línea de abajo:
           token: ${{ secrets.API_TOKEN_GITHUB }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x' # Cambia a 7.0 o 9.0 si usas otra versión
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
