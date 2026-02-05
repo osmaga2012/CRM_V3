@@ -6,6 +6,7 @@ using CRM.V3.Shared.Interfaces;
 using CRM.V3.Shared.Services;
 using CRM.V3.Web.Client.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.AspNetCore.Components.Web;
 using System.Text;
 using Microsoft.AspNetCore.Components.Authorization;
 using CRM.V3.Shared.Providers; // Añade esta directiva using
