@@ -56,6 +56,9 @@ jobs:
         run: |
           # El publish manda todo a 'release/wwwroot' en la raíz del runner
           touch release/wwwroot/.nojekyll
+          # Asegurar UTF-8 en el procesamiento
+          export LANG=en_US.UTF-8
+          export LC_ALL=en_US.UTF-8
           # Asegurar que el base href está correctamente configurado
           sed -i 's|<base href="/" />|<base href="/CRM_V3/" />|g' release/wwwroot/index.html
           # Verificar que ya tiene el base href correcto (no duplicar)

@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
     <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    <!-- Asegurar UTF-8 -->
+    <Utf8Output>true</Utf8Output>
   </PropertyGroup>
 
   <ItemGroup>
