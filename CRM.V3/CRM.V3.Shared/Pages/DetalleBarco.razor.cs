@@ -206,7 +206,7 @@ namespace CRM.V3.Shared.Pages
         {
             try
             {
-                await servicioBarcosTramites.DeleteAsync($"api/BarcosTramite/{tramiteId}");
+                await servicioBarcosTramites.DeleteAsync($"api/BarcosTramite/",tramiteId);
                 await CargarDatosBarco();
             }
             catch (Exception ex)
@@ -325,7 +325,7 @@ namespace CRM.V3.Shared.Pages
         {
             try
             {
-                await servicioUsuarios.DeleteAsync($"api/Usuario/{usuarioId}");
+                await servicioUsuarios.DeleteAsync($"api/Usuario/",usuarioId);
                 await CargarDatosBarco();
             }
             catch (Exception ex)
