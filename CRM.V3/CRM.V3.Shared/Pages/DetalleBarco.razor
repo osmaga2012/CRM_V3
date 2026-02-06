@@ -181,15 +181,17 @@ else
                                 {
                                     var hoy = DateOnly.FromDateTime(DateTime.Now);
                                     var diasRestantes = tramite.FechaFin.DayNumber - hoy.DayNumber;
-                                    var estadoColor = diasRestantes < 0 ? "red" : (diasRestantes <= 30 ? "amber" : "sky");
                                     var estadoTexto = diasRestantes < 0 ? "Vencido" : (diasRestantes <= 30 ? "Por Vencer" : "Vigente");
+                                    var borderClass = diasRestantes < 0 ? "border-red-500" : (diasRestantes <= 30 ? "border-amber-500" : "border-sky-500");
+                                    var bgClass = diasRestantes < 0 ? "bg-red-100" : (diasRestantes <= 30 ? "bg-amber-100" : "bg-sky-100");
+                                    var textClass = diasRestantes < 0 ? "text-red-600" : (diasRestantes <= 30 ? "text-amber-600" : "text-sky-600");
 
-                                    <div class="bg-slate-50 rounded-xl p-5 border-l-4 border-@(estadoColor)-500 hover:shadow-lg transition-all">
+                                    <div class="bg-slate-50 rounded-xl p-5 border-l-4 @borderClass hover:shadow-lg transition-all">
                                         <div class="flex items-start justify-between gap-4">
                                             <div class="flex-1">
                                                 <div class="flex items-start gap-4">
-                                                    <div class="bg-@(estadoColor)-100 w-14 h-14 flex items-center justify-center rounded-xl shrink-0">
-                                                        <span class="material-symbols-outlined text-@(estadoColor)-600 text-2xl">description</span>
+                                                    <div class="@bgClass w-14 h-14 flex items-center justify-center rounded-xl shrink-0">
+                                                        <span class="material-symbols-outlined @textClass text-2xl">description</span>
                                                     </div>
                                                     <div class="flex-1">
                                                         <h3 class="text-lg font-bold text-slate-900 mb-2">@tramite.Certificado</h3>
@@ -202,7 +204,7 @@ else
                                                                 <span class="material-symbols-outlined text-base">event_available</span>
                                                                 <span>Fin: <strong>@tramite.FechaFin.ToString("dd/MM/yyyy")</strong></span>
                                                             </div>
-                                                            <div class="flex items-center gap-2 text-@(estadoColor)-600">
+                                                            <div class="flex items-center gap-2 @textClass">
                                                                 <span class="material-symbols-outlined text-base">schedule</span>
                                                                 <span class="font-semibold">@estadoTexto (@diasRestantes días)</span>
                                                             </div>

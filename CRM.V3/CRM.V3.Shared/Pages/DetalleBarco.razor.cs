@@ -225,6 +225,8 @@ namespace CRM.V3.Shared.Pages
             nuevoUsuario = new UsuarioDto
             {
                 CodigoEmpresa = empresa?.CodigoEmpresa,
+                // Note: Using Barco.Id for EmpresaId to match pattern in DetalleEmpresa.razor.cs
+                // This may need review if there's a separate empresa.Id field available
                 EmpresaId = empresa?.Barco?.Id,
                 Activo = true,
                 Rol = "Cliente",
