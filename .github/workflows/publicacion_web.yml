@@ -22,26 +22,29 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout CRM_V3
-         uses: actions/checkout@v4
-         with:
-          submodules: recursive # Esto descarga automáticamente la carpeta CRM_REPO (o como se llame el submódulo)
-          token: ${{ secrets.API_TOKEN_GITHUB }} # Necesario si el submódulo es privado
-          
+      - name: Checkout CRM_V3 with Submodules
+        uses: actions/checkout@v4
+        with:
+          # Esto descarga el código principal y el submódulo de una sola vez
+          submodules: recursive
+          token: ${{ secrets.API_TOKEN_GITHUB }}
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
-      - name: Restore .NET workloads
-        run: dotnet workload restore
-        
+
+      - name: Debug - List Projects (Para verificar rutas)
+        run: find . -name "*.csproj"
+
       - name: Restore dependencies
-        # Entramos en la carpeta donde está el proyecto para que el ../CRM_REPO funcione
-        run: dotnet restore CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj
+        # Usamos el asterisco para que no falle por rutas de carpetas intermedias
+        run: dotnet restore **/CRM.V3.Web.Client.csproj
+
       - name: Publish App
         run: |
-          dotnet publish CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj \
+          dotnet publish **/CRM.V3.Web.Client.csproj \
           -c Release \
           -o release \
           /p:StaticWebAssetsEnabled=true \
@@ -50,14 +53,14 @@ jobs:
 
       - name: Fix for GitHub Pages
         run: |
-          # El publish manda todo a 'release/wwwroot' en la raíz del runner
+          # Evita que GitHub procese la carpeta con Jekyll
           touch release/wwwroot/.nojekyll
-          # Asegurar que el base href está correctamente configurado
+          
+          # Ajuste del Base Href para GitHub Pages (Nombre del repo: CRM_V3)
+          # Esto busca <base href="/" /> y lo cambia por <base href="/CRM_V3/" />
           sed -i 's|<base href="/" />|<base href="/CRM_V3/" />|g' release/wwwroot/index.html
-          # Verificar que ya tiene el base href correcto (no duplicar)
-          if ! grep -q '<base href="/CRM_V3/" />' release/wwwroot/index.html; then
-            sed -i 's|<base href="/[^"]*" />|<base href="/CRM_V3/" />|g' release/wwwroot/index.html
-          fi
+          
+          # Crear una copia para manejar errores 404 en rutas de Blazor
           cp release/wwwroot/index.html release/wwwroot/404.html
 
       - name: Setup Pages
