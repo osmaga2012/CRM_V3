@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: osmaga2012/CRM
-          path: CRM_REPO # Los DTOs quedan al lado de main_repo 11
+          path: CRM #CRM_REPO # Los DTOs quedan al lado de main_repo 11
           token: ${{ secrets.API_TOKEN_GITHUB }}
 
       - name: Setup .NET
