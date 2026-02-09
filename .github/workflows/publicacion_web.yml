@@ -22,18 +22,23 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+       #- name: Checkout CRM_V3
+       # uses: actions/checkout@v4
+       # #with:
+       # #  path: main_repo # Metemos el código principal aquí
+
+       #- name: Checkout Dtos
+       # uses: actions/checkout@v4
+       # with:
+       #   repository: osmaga2012/CRM
+       #   path: CRM #CRM_REPO # Los DTOs quedan al lado de main_repo 11
+       #   token: ${{ secrets.API_TOKEN_GITHUB }}
       - name: Checkout CRM_V3
-        uses: actions/checkout@v4
-        #with:
-        #  path: main_repo # Metemos el código principal aquí
-
-      - name: Checkout Dtos
-        uses: actions/checkout@v4
-        with:
-          repository: osmaga2012/CRM
-          path: CRM #CRM_REPO # Los DTOs quedan al lado de main_repo 11
-          token: ${{ secrets.API_TOKEN_GITHUB }}
-
+         uses: actions/checkout@v4
+         with:
+          submodules: recursive # Esto descarga automáticamente la carpeta CRM_REPO (o como se llame el submódulo)
+          token: ${{ secrets.API_TOKEN_GITHUB }} # Necesario si el submódulo es privado
+          
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
