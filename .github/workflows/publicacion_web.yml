@@ -40,7 +40,7 @@ jobs:
 
       - name: Restore dependencies
         # Usamos el asterisco para que no falle por rutas de carpetas intermedias
-        run: dotnet restore CRM.V3/CRM.V3.Web.Client.csproj
+        run: dotnet restore **/CRM.V3.Web.Client.csproj
 
       - name: Publish App
         run: |
