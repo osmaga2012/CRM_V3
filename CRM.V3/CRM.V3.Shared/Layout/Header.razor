@@ -25,19 +25,19 @@
                 <!-- Navegación desktop -->
                 <nav class="hidden md:flex items-center gap-1 mr-4">
                     <a href="#" @onclick="NavigateToCofradia" @onclick:preventDefault 
-                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("/cofradia")">
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("cofradia")">
                         Panel
                     </a>
                     <a href="#" @onclick="NavigateToEmpresas" @onclick:preventDefault 
-                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("/empresas")">
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("empresas")">
                         Empresas
                     </a>
                     <a href="#" @onclick="NavigateToBuques" @onclick:preventDefault 
-                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("/buques")">
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("barcos")">
                         Buques
                     </a>
                     <a href="#" @onclick="NavigateToTramitesMasivos" @onclick:preventDefault 
-                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("/tramites-masivos")">
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("tramites-masivos")">
                         Trámites Masivos
                     </a>
                 </nav>
