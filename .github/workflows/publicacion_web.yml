@@ -37,7 +37,15 @@ jobs:
 
       - name: Debug - List Projects (Para verificar rutas)
         run: find . -name "*.csproj"
+        
+      - name: Install WASM Tools
+        # Este es el paso que te pedía el error NETSDK1147
+        run: dotnet workload install wasm-tools
 
+      - name: Create Symlink for CRM Folder
+        # Truco maestro: como tu .csproj busca la carpeta "CRM" pero tú tienes "CRM_REPO",
+        # creamos un acceso directo para que el compilador encuentre los archivos en ambos sitios.
+        run: ln -s CRM_REPO CRM
       - name: Restore dependencies
         # Usamos el asterisco para que no falle por rutas de carpetas intermedias
         run: dotnet restore CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj
