@@ -21,14 +21,13 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
   </ItemGroup>
 
-    <ItemGroup>
-	    <ProjectReference Include="CRM_REPO/CRM.Dtos/CRM.Dtos.csproj" />
-		<!--<ProjectReference Include="../../CRM_REPO/CRM.Dtos/CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' == 'true'" />
-		<ProjectReference Include="../../CRM_REPO/CRM.Dtos/CRM.Dtos.csproj" Condition="!Exists('C:\Users\oscar')" />-->
-		<ProjectReference Include="C:\Users\oscar\source\repos\CRM\CRM.Dtos\CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' != 'true'" />
-
-		<ProjectReference Include="C:\Users\oscar\source\repos\CRM\CRM.Dtos\CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' != 'true'" />
-    </ItemGroup>
+  <ItemGroup>
+    <!-- Ruta para GitHub Actions -->
+    <ProjectReference Include="../../CRM/CRM.Dtos/CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' == 'true'" />
+    
+    <!-- Ruta para desarrollo local -->
+    <ProjectReference Include="C:\Users\oscar\source\repos\CRM\CRM.Dtos\CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' != 'true'" />
+  </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Helpers\Traducciones\" />
