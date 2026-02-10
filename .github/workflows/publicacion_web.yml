@@ -1,4 +1,4 @@
-name: Deploy Blazor WASM to GitHub Pages
+﻿name: Deploy Blazor WASM to GitHub Pages
 on:
   push:
     branches:
@@ -38,9 +38,17 @@ jobs:
           dotnet nuget add source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet10/nuget/v3/index.json --name dotnet10
 
       - name: Install WASM Workload (Solo WASM)
-        # Instalamos solo wasm-tools-net10 y omitimos errores de otros manifests
+        # Instalamos solo wasm-tools y usamos --skip-manifest-update para evitar problemas con versiones no disponibles
         run: |
-          dotnet workload install wasm-tools --ignore-failed-sources --no-cache
+          dotnet workload install wasm-tools --skip-manifest-update --ignore-failed-sources || true
+          dotnet workload list
+      
+      - name: Verify Workload Installation
+        run: |
+          echo "Verificando workloads instalados:"
+          dotnet workload list
+          echo "SDK instalado:"
+          dotnet --version
       - name: Create Symlink for CRM Folder
         # Mantenemos esto porque es vital para que encuentre tu lógica de negocio
         run: ln -s CRM_REPO CRM
