@@ -59,7 +59,7 @@ namespace CRM.V3.Shared.Pages
 
                 // Cargar barco con trámites
                 string[] includesBarcos = new string[] { "BarcosTramites" };
-                var barcosResult = await servicioBarcos.GetAllAsync("api/Barco", null, includesBarcos);
+                var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
                 barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == CodigoBarco);
 
                 if (barco == null)
@@ -90,7 +90,7 @@ namespace CRM.V3.Shared.Pages
                 }
 
                 // Cargar usuarios de la empresa/barco
-                var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuario", null, null);
+                var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", null, null);
                 usuariosBarco = usuariosResult?
                     .Where(u => u.CodigoEmpresa == CodigoEmpresa)
                     .OrderBy(u => u.Nombre)
@@ -299,7 +299,7 @@ namespace CRM.V3.Shared.Pages
                 else
                 {
                     // Validar que el NIF no esté duplicado solo al crear
-                    var usuariosExistentes = await servicioUsuarios.GetAllAsync("api/Usuario", null, null);
+                    var usuariosExistentes = await servicioUsuarios.GetAllAsync("api/Usuarios", null, null);
                     if (usuariosExistentes?.Any(u => u.NIFAcceso == nuevoUsuario.NIFAcceso) == true)
                     {
                         Console.WriteLine("El NIF ya está registrado");
@@ -307,7 +307,7 @@ namespace CRM.V3.Shared.Pages
                     }
 
                     // Crear nuevo usuario
-                    var resultado = await servicioUsuarios.CreateAsync("api/Usuario", nuevoUsuario);
+                    var resultado = await servicioUsuarios.CreateAsync("api/Usuarios", nuevoUsuario);
                     if (resultado != null && resultado.Success)
                     {
                         await CargarDatosBarco();

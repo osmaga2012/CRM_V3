@@ -348,7 +348,7 @@
                 .ToList();
 
             // Cargar usuarios
-            var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuario", null, null);
+            var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", null, null);
             var usuarios = usuariosResult?.ToList() ?? new List<UsuarioDto>();
             
             totalUsuarios = usuarios.Count(u => u.Activo); // Solo usuarios activos
@@ -358,7 +358,7 @@
 
             // Cargar barcos con include de BarcosTramites para contar trámites
             string[] includesBarcos = new string[] { "BarcosTramites" };
-            var barcosResult = await servicioBarcos.GetAllAsync("api/Barco", null, includesBarcos);
+            var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
             var barcos = barcosResult?.ToList() ?? new List<BarcosDto>();
             
             // Contar total de trámites desde BarcosTramites (colección en BarcosDto)
