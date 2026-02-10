@@ -63,7 +63,8 @@ jobs:
           -o release \
           /p:StaticWebAssetsEnabled=true \
           /p:GHPages=true \
-          /p:BlazorEnableCompression=false
+          /p:BlazorEnableCompression=false \
+          /p:CompressionEnabled=false
 
       - name: Fix for GitHub Pages
         run: |

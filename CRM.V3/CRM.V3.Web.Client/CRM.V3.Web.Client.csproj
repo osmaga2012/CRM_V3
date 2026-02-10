@@ -9,6 +9,7 @@
 	  <WasmEnableSIMD>false</WasmEnableSIMD>
 	  <WasmEnableExceptionHandling>false</WasmEnableExceptionHandling>
     <BlazorEnableCompression>false</BlazorEnableCompression>
+    <CompressionEnabled>false</CompressionEnabled>
     <DisableStaticWebAssetsScanning>false</DisableStaticWebAssetsScanning>
     <RunAOTCompilation>false</RunAOTCompilation>
   </PropertyGroup>
