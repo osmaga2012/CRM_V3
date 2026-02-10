@@ -89,7 +89,7 @@ namespace CRM.V3.Shared.Pages
         private async Task CargarBarcos()
         {
             string[] includesEmpresas = new string[] { "Barcos" };
-            var result = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
+            var result = await servicioEmpresas.GetAllAsync("api/Empresas", null, includesEmpresas);
             empresas = result?.ToList() ?? new List<EmpresasDto>();
         }
 
