@@ -8,8 +8,7 @@
     <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
 	  <WasmEnableSIMD>false</WasmEnableSIMD>
 	  <WasmEnableExceptionHandling>false</WasmEnableExceptionHandling>
-    <BuildCompressionFormats>None</BuildCompressionFormats>
-    <PublishCompressionFormats>None</PublishCompressionFormats>
+    <BlazorEnableCompression>false</BlazorEnableCompression>
     <DisableStaticWebAssetsScanning>false</DisableStaticWebAssetsScanning>
     <RunAOTCompilation>false</RunAOTCompilation>
   </PropertyGroup>
