@@ -1,4 +1,4 @@
-namespace CRM.V3.Shared.Services
+﻿namespace CRM.V3.Shared.Services
 {
     public interface IFormFactor
     {

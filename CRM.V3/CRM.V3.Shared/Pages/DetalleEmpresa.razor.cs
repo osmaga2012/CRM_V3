@@ -1,4 +1,4 @@
-using CRM.Dtos;
+Ôªøusing CRM.Dtos;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components;
 
@@ -17,7 +17,7 @@ namespace CRM.V3.Shared.Pages
         private EmpresasDto? empresa;
         private BarcosDto? barco;
 
-        // EstadÌsticas de tr·mites
+        // Estad√≠sticas de tr√°mites
         private int totalTramites = 0;
         private int tramitesVigentes = 0;
         private int tramitesPorVencer = 0;
@@ -64,7 +64,7 @@ namespace CRM.V3.Shared.Pages
                     return;
                 }
 
-                // Cargar barco con tr·mites si existe
+                // Cargar barco con tr√°mites si existe
                 if (empresa.Barco != null)
                 {
                     string[] includesBarcos = new string[] { "BarcosTramites" };
@@ -76,7 +76,7 @@ namespace CRM.V3.Shared.Pages
                         tramites = barco.BarcosTramites.ToList();
                         totalTramites = tramites.Count;
 
-                        // Clasificar tr·mites por fechas
+                        // Clasificar tr√°mites por fechas
                         var hoy = DateOnly.FromDateTime(DateTime.Now);
                         var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
 
@@ -104,7 +104,7 @@ namespace CRM.V3.Shared.Pages
             }
         }
 
-        #region GestiÛn de Tr·mites
+        #region Gesti√≥n de Tr√°mites
 
         private void MostrarFormularioTramite()
         {
@@ -135,7 +135,7 @@ namespace CRM.V3.Shared.Pages
 
             try
             {
-                // Asegurarse de que las fechas estÈn configuradas
+                // Asegurarse de que las fechas est√©n configuradas
                 if (nuevoTramite.FechaInicio == default)
                 {
                     nuevoTramite.FechaInicio = DateOnly.FromDateTime(DateTime.Now);
@@ -149,7 +149,7 @@ namespace CRM.V3.Shared.Pages
                     nuevoTramite.FechaAviso = nuevoTramite.FechaFin.AddDays(-nuevoTramite.DiasAvisoTramite);
                 }
 
-                // Guardar el tr·mite usando el servicio
+                // Guardar el tr√°mite usando el servicio
                 var resultado = await servicioBarcosTramites.CreateAsync("api/BarcosTramite", nuevoTramite);
 
                 if (resultado != null)
@@ -161,13 +161,13 @@ namespace CRM.V3.Shared.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al guardar tr·mite: {ex.Message}");
+                Console.WriteLine($"Error al guardar tr√°mite: {ex.Message}");
             }
         }
 
         #endregion
 
-        #region GestiÛn de Usuarios
+        #region Gesti√≥n de Usuarios
 
         private void MostrarFormularioUsuario()
         {
@@ -198,11 +198,11 @@ namespace CRM.V3.Shared.Pages
 
             try
             {
-                // Validar que el NIF no estÈ duplicado
+                // Validar que el NIF no est√© duplicado
                 var usuariosExistentes = await servicioUsuarios.GetAllAsync("api/Usuario", null, null);
                 if (usuariosExistentes?.Any(u => u.NIFAcceso == nuevoUsuario.NIFAcceso) == true)
                 {
-                    Console.WriteLine("El NIF ya est· registrado");
+                    Console.WriteLine("El NIF ya est√° registrado");
                     return;
                 }
 
@@ -236,7 +236,7 @@ namespace CRM.V3.Shared.Pages
 
         #endregion
 
-        #region MÈtodos Auxiliares
+        #region M√©todos Auxiliares
 
         private string GetInicialesEmpresa(string nombreEmpresa)
         {
