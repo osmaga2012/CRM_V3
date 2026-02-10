@@ -1,4 +1,4 @@
-@page "/login2"
+ï»¿@page "/login2"
 @using CRM.Dtos.Request
 @using CRM.V3.Shared.Interfaces
 @using CRM.V3.Shared.Services
@@ -20,17 +20,17 @@
         <div class="bg-primary p-3 rounded-xl shadow-lg mb-4">
             <span class="material-symbols-outlined text-white text-4xl">sailing</span>
         </div>
-        <p>Portal máritimo</p>
+        <p>Portal mÃ¡ritimo</p>
         <h1 class="text-white text-3xl font-bold tracking-tight text-center drop-shadow-md">
-            Portal Marítimo
+            Portal MarÃ­timo
         </h1>
-        <p class="text-white/80 text-sm mt-1 font-medium">Gestión de Trámites Navales</p>
+        <p class="text-white/80 text-sm mt-1 font-medium">GestiÃ³n de TrÃ¡mites Navales</p>
     </div>
 
     <div class="w-full bg-white dark:bg-slate-900/95 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden border border-white/20">
         <div class="p-6 sm:p-8">
             <div class="mb-6">
-                <h2 class="text-[#0d141b] dark:text-white text-xl font-bold">Iniciar Sesión</h2>
+                <h2 class="text-[#0d141b] dark:text-white text-xl font-bold">Iniciar SesiÃ³n</h2>
                 <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Ingrese sus credenciales para continuar.</p>
             </div>
 
@@ -38,7 +38,7 @@
                 <div class="space-y-4">
                     <div class="flex flex-col gap-2">
                         <label class="text-[#0d141b] dark:text-slate-200 text-sm font-semibold leading-normal">
-                            Correo electrónico o Usuario
+                            Correo electrÃ³nico o Usuario
                         </label>
                         <div class="relative group">
                             <InputText @bind-Value="loginModel.Email" 
@@ -49,13 +49,13 @@
 
                     <div class="flex flex-col gap-2">
                         <label class="text-[#0d141b] dark:text-slate-200 text-sm font-semibold leading-normal">
-                            Contraseña
+                            ContraseÃ±a
                         </label>
                         <div class="flex w-full items-stretch rounded-lg group">
                             <InputText @bind-Value="loginModel.Password" 
                                        type="@(showPassword ? "text" : "password")"
                                        class="form-input flex w-full min-w-0 flex-1 rounded-lg text-[#0d141b] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/40 border border-[#cfdbe7] dark:border-slate-700 bg-slate-50 dark:bg-slate-800 h-12 placeholder:text-[#4c739a] p-[15px] rounded-r-none border-r-0 text-base font-normal transition-all" 
-                                       placeholder="••••••••" />
+                                       placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
                             <div class="text-[#4c739a] flex border border-[#cfdbe7] dark:border-slate-700 bg-slate-50 dark:bg-slate-800 items-center justify-center pr-[15px] rounded-r-lg border-l-0">
                                 <span class="material-symbols-outlined cursor-pointer select-none" @onclick="TogglePasswordVisibility">
                                     @(showPassword ? "visibility_off" : "visibility")
@@ -66,7 +66,7 @@
 
                     <div class="flex justify-start">
                         <a class="text-primary text-sm font-semibold hover:underline decoration-2 underline-offset-4 cursor-pointer" @onclick="HandleForgotPassword">
-                            ¿Olvidó su contraseña?
+                            Â¿OlvidÃ³ su contraseÃ±a?
                         </a>
                     </div>
 
@@ -86,10 +86,10 @@
     </div>
 
     <div class="mt-8 text-center text-white/60 text-xs flex flex-col gap-2 pb-8">
-        <p>© 2024 Autoridad Marítima Nacional. Todos los derechos reservados.</p>
+        <p>Â© 2024 Autoridad MarÃ­tima Nacional. Todos los derechos reservados.</p>
         <div class="flex justify-center gap-4">
-            <a class="hover:text-white underline cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/terminos")'>Términos</a>
-            <a class="hover:text-white underline cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/soporte")'>Soporte Técnico</a>
+            <a class="hover:text-white underline cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/terminos")'>TÃ©rminos</a>
+            <a class="hover:text-white underline cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/soporte")'>Soporte TÃ©cnico</a>
             <a class="hover:text-white underline cursor-pointer" @onclick='() => NavigationManager.NavigateTo("/privacidad")'>Privacidad</a>
         </div>
         <p class="mt-2 opacity-40">v2.4.0-build.82</p>
@@ -132,9 +132,9 @@
             if (result.IsSuccess)
             {
                 // 1. Esto DEBE actualizar el estado del CustomAuthStateProvider internamente
-                // Si tu authService no lo hace, el Router de Blazor seguirá pensando que eres Anónimo
+                // Si tu authService no lo hace, el Router de Blazor seguirÃ¡ pensando que eres AnÃ³nimo
 
-                await Task.Delay(100); // Pequeño respiro para que el token se asiente en el almacenamiento
+                await Task.Delay(100); // PequeÃ±o respiro para que el token se asiente en el almacenamiento
 
                 // 2. Navegamos
                 //await Navigation.NavigateToAsync("/");
@@ -142,12 +142,12 @@
             }
             else
             {
-                Error = result.Message ?? "Error al iniciar sesión.";
+                Error = result.Message ?? "Error al iniciar sesiÃ³n.";
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error durante el inicio de sesión: {ex.Message}");
+            Console.WriteLine($"Error durante el inicio de sesiÃ³n: {ex.Message}");
             Error = $"{ex.Message} - {ex.InnerException.Message}";
             //throw;
         }
@@ -158,15 +158,15 @@
 
     private async Task HandleLogin1()
     {
-        // Implementar lógica de login aquí
-        // Después del login exitoso, redirigir al ReturnUrl o a home
+        // Implementar lÃ³gica de login aquÃ­
+        // DespuÃ©s del login exitoso, redirigir al ReturnUrl o a home
         var redirectUrl = !string.IsNullOrEmpty(returnUrl) ? returnUrl : "/";
         NavigationManager.NavigateTo(redirectUrl, forceLoad: true);
     }
 
     private void HandleForgotPassword()
     {
-        // Implementar lógica de recuperación de contraseña
+        // Implementar lÃ³gica de recuperaciÃ³n de contraseÃ±a
         NavigationManager.NavigateTo("/recuperar-password");
     }
 
