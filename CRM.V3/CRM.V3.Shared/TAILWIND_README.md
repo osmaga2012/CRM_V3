@@ -13,6 +13,13 @@ This project uses Tailwind CSS for styling. The CSS is built from source using t
 
 The Tailwind CSS is automatically built as part of the .NET build process via the `BuildTailwindCSS` target in `CRM.V3.Shared.csproj`.
 
+**Build optimization**: 
+- In **Debug** mode: CSS is only built if the output file doesn't exist (to speed up development builds)
+- In **Release** mode: CSS is always rebuilt (to ensure production has the latest styles)
+- NPM install only runs if node_modules doesn't exist
+
+For development, you can manually rebuild CSS when making style changes using the manual build or watch mode commands below.
+
 ### Manual Build
 
 To manually build the CSS:
