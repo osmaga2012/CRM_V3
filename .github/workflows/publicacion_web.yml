@@ -30,8 +30,17 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+          
+      - name: Add .NET 10 Preview Feed
+        run: |
+          dotnet nuget add source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet10/nuget/v3/index.json --name dotnet10
 
+      - name: Install WASM Workload (Solo WASM)
+        # Instalamos solo wasm-tools-net10 y omitimos errores de otros manifests
+        run: |
+          dotnet workload install wasm-tools --ignore-failed-sources --no-cache
       - name: Create Symlink for CRM Folder
         # Mantenemos esto porque es vital para que encuentre tu lógica de negocio
         run: ln -s CRM_REPO CRM
