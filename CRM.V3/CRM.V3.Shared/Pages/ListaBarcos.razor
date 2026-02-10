@@ -244,13 +244,13 @@ else
                         <span class="material-symbols-outlined text-lg">chevron_left</span>
                     </button>
                     
-                    @if (ObtenerNumerosPagina().First() > 1)
+                    @if (ObtenerNumerosPagina().FirstOrDefault() > 1)
                     {
                         <button @onclick="() => IrAPagina(1)" 
                                 class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50">
                             1
                         </button>
-                        @if (ObtenerNumerosPagina().First() > 2)
+                        @if (ObtenerNumerosPagina().FirstOrDefault() > 2)
                         {
                             <span class="text-slate-400">...</span>
                         }
