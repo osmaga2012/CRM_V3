@@ -6,8 +6,11 @@
     <Nullable>enable</Nullable>
     <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
     <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
-	<WasmEnableSIMD>false</WasmEnableSIMD>
-	<WasmEnableExceptionHandling>false</WasmEnableExceptionHandling>
+	  <WasmEnableSIMD>false</WasmEnableSIMD>
+	  <WasmEnableExceptionHandling>false</WasmEnableExceptionHandling>
+    <BuildCompressionFormats>None</BuildCompressionFormats>
+    <PublishCompressionFormats>None</PublishCompressionFormats>
+    <DisableStaticWebAssetsScanning>false</DisableStaticWebAssetsScanning>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
