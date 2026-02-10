@@ -1,0 +1,11 @@
+﻿root = true
+
+[*]
+# Todos los archivos se guardarán en UTF-8 con firma (BOM)
+charset = utf-8-bom
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{razor,cs,html,css,js}]
+charset = utf-8-bom
