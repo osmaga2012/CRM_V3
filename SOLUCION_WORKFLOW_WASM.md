@@ -14,6 +14,19 @@ error : Unknown compression format 'None' for ...
 error : Could not create compressed asset for original asset ...
 ```
 
+### ⚠️ CAUSA RAÍZ (Error 2)
+**El problema estaba en DOS lugares:**
+1. ❌ En el archivo de workflow YAML (ya corregido)
+2. ❌ **En el archivo `.csproj` del proyecto** (CRÍTICO)
+
+El archivo `CRM.V3.Web.Client.csproj` contenía:
+```xml
+<BuildCompressionFormats>None</BuildCompressionFormats>
+<PublishCompressionFormats>None</PublishCompressionFormats>
+```
+
+Estas propiedades en el `.csproj` **sobreescriben** cualquier parámetro que se pase en el comando `dotnet publish`, por eso el error persistía.
+
 ---
 
 ## ✅ Soluciones Implementadas
@@ -42,7 +55,42 @@ error : Could not create compressed asset for original asset ...
 
 ---
 
-### Solución 2: Formato de Compresión - Eliminar Parámetros Inválidos
+### Solución 2: Formato de Compresión - Eliminar de `.csproj` Y YAML
+
+**🔴 CRÍTICO: El problema estaba en el archivo `.csproj`**
+
+#### Paso 1: Corregir el archivo `.csproj`
+
+**Archivo:** `CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj`
+
+```xml
+<!-- ❌ INCORRECTO - Eliminar estas líneas -->
+<BuildCompressionFormats>None</BuildCompressionFormats>
+<PublishCompressionFormats>None</PublishCompressionFormats>
+
+<!-- ✅ CORRECTO - Reemplazar con -->
+<BlazorEnableCompression>false</BlazorEnableCompression>
+```
+
+**Cambio completo aplicado:**
+```xml
+<PropertyGroup>
+  <TargetFramework>net10.0</TargetFramework>
+  <ImplicitUsings>enable</ImplicitUsings>
+  <Nullable>enable</Nullable>
+  <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+  <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+  <WasmEnableSIMD>false</WasmEnableSIMD>
+  <WasmEnableExceptionHandling>false</WasmEnableExceptionHandling>
+  <BlazorEnableCompression>false</BlazorEnableCompression>  <!-- ✅ Usar esto -->
+  <DisableStaticWebAssetsScanning>false</DisableStaticWebAssetsScanning>
+  <RunAOTCompilation>false</RunAOTCompilation>
+</PropertyGroup>
+```
+
+#### Paso 2: Corregir el workflow YAML
+
+**Archivo:** `.github/workflows/publicacion_web.yml`
 
 **Problema:**
 ```yaml
@@ -64,8 +112,8 @@ dotnet publish CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj \
 
 **¿Por qué?**
 - En .NET, `None` NO es un formato de compresión reconocido
-- Para desactivar la compresión, simplemente usa `/p:BlazorEnableCompression=false`
-- No es necesario especificar `BuildCompressionFormats` ni `PublishCompressionFormats`
+- Las propiedades en el `.csproj` tienen **prioridad** sobre los parámetros de línea de comandos
+- Para desactivar la compresión, usa `/p:BlazorEnableCompression=false` O `<BlazorEnableCompression>false</BlazorEnableCompression>` en el `.csproj`
 
 ---
 
@@ -215,11 +263,17 @@ git push origin master
 
 ## 🎯 Resumen de Cambios
 
-| Problema | Solución |
-|----------|----------|
-| ❌ `Workload installation failed` | ✅ Agregado `--skip-manifest-update` y verificación |
-| ❌ `Unknown compression format 'None'` | ✅ Eliminados parámetros `BuildCompressionFormats` y `PublishCompressionFormats` |
-| ❌ Falta verificación de instalación | ✅ Agregado paso "Verify Workload Installation" |
+| Problema | Archivos Afectados | Solución |
+|----------|-------------------|----------|
+| ❌ `Workload installation failed` | `.github/workflows/publicacion_web.yml` | ✅ Agregado `--skip-manifest-update` y verificación |
+| ❌ `Unknown compression format 'None'` | `.github/workflows/publicacion_web.yml` | ✅ Eliminados parámetros `BuildCompressionFormats` y `PublishCompressionFormats` |
+| ❌ `Unknown compression format 'None'` | **`CRM.V3.Web.Client.csproj`** (CAUSA RAÍZ) | ✅ Eliminadas propiedades `<BuildCompressionFormats>` y `<PublishCompressionFormats>` |
+| ❌ Falta verificación de instalación | `.github/workflows/publicacion_web.yml` | ✅ Agregado paso "Verify Workload Installation" |
+
+### 🔴 Lección Importante:
+**Las propiedades MSBuild en el archivo `.csproj` tienen PRIORIDAD sobre los parámetros de línea de comandos.**
+
+Por eso, aunque corrigiéramos el workflow YAML, el error persistía hasta que corregimos el `.csproj`.
 
 ---
 
