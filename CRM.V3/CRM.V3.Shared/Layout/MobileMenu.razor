@@ -20,15 +20,15 @@
                     <span class="material-symbols-outlined">corporate_fare</span> Empresas
                 </a>
                 <a class="flex items-center gap-3 p-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#" @onclick="NavigateToBuques" @onclick:preventDefault>
-                    <span class="material-symbols-outlined">directions_boat</span> Buques de la Flota
+                    <span class="material-symbols-outlined">directions_boat</span> Barcos
                 </a>
                 <a class="flex items-center gap-3 p-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#" @onclick="NavigateToTramitesMasivos" @onclick:preventDefault>
-                    <span class="material-symbols-outlined">dynamic_feed</span> Trámites Masivos
+                    <span class="material-symbols-outlined">dynamic_feed</span> Trámites
                 </a>
                 <div class="my-4 border-t border-slate-100 dark:border-slate-800"></div>
-                <a class="flex items-center gap-3 p-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#" @onclick="NavigateToReportes" @onclick:preventDefault>
+                <!--<a class="flex items-center gap-3 p-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#" @onclick="NavigateToReportes" @onclick:preventDefault>
                     <span class="material-symbols-outlined">analytics</span> Reportes Consolidados
-                </a>
+                </a>-->
                 <a class="flex items-center gap-3 p-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#" @onclick="NavigateToConfiguracion" @onclick:preventDefault>
                     <span class="material-symbols-outlined">settings</span> Configuración
                 </a>
@@ -53,10 +53,10 @@
         NavigationManager.NavigateTo(route);
     }
 
-    private void NavigateToCofradia() => Navigate("/cofradia");
-    private void NavigateToEmpresas() => Navigate("/empresas");
-    private void NavigateToBuques() => Navigate("/buques");
-    private void NavigateToTramitesMasivos() => Navigate("/tramites-masivos");
+    private void NavigateToCofradia() => Navigate("cofradia");
+    private void NavigateToEmpresas() => Navigate("empresas");
+    private void NavigateToBuques() => Navigate("barcos");
+    private void NavigateToTramitesMasivos() => Navigate("tramites");
     private void NavigateToReportes() => Navigate("/reportes");
-    private void NavigateToConfiguracion() => Navigate("/configuracion");
+    private void NavigateToConfiguracion() => Navigate("configuracion");
 }

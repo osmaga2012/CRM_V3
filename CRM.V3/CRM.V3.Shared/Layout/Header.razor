@@ -86,18 +86,19 @@
     }
 
     private void NavigateToHome() => Navigate("/");
-    private void NavigateToCofradia() => Navigate("/cofradia");
-    private void NavigateToEmpresas() => Navigate("/empresas");
-    private void NavigateToBuques() => Navigate("/buques");
-    private void NavigateToTramitesMasivos() => Navigate("/tramites-masivos");
-    private void NavigateToNotificaciones() => Navigate("/notificaciones");
-    private void NavigateToPerfil() => Navigate("/perfil");
+    private void NavigateToCofradia() => Navigate("cofradia");
+    private void NavigateToEmpresas() => Navigate("empresas");
+    private void NavigateToBuques() => Navigate("barcos");
+    private void NavigateToTramitesMasivos() => Navigate("tramites");
+    private void NavigateToNotificaciones() => Navigate("notificaciones");
+    private void NavigateToPerfil() => Navigate("perfil");
 
     private string GetNavClass(string route)
     {
-        return currentRoute.StartsWith(route.TrimStart('/')) 
-            ? "bg-primary/10 text-primary" 
-            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
+        //return currentRoute.StartsWith(route.TrimStart('/')) 
+        //    ? "bg-primary/10 text-primary" 
+        //    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
+        return "";
     }
 
     public void Dispose()
