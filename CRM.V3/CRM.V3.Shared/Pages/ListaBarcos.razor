@@ -244,7 +244,7 @@ else
                         <span class="material-symbols-outlined text-lg">chevron_left</span>
                     </button>
                     
-                    @if (ObtenerNumerosPagina().First() > 1)
+                    @if (ObtenerNumerosPagina().Any() && ObtenerNumerosPagina().First() > 1)
                     {
                         <button @onclick="() => IrAPagina(1)" 
                                 class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50">
@@ -273,7 +273,7 @@ else
                         }
                     }
 
-                    @if (ObtenerNumerosPagina().Last() < TotalPaginas)
+                    @if (ObtenerNumerosPagina().Any() && ObtenerNumerosPagina().Last() < TotalPaginas)
                     {
                         @if (ObtenerNumerosPagina().Last() < TotalPaginas - 1)
                         {
