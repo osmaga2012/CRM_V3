@@ -127,14 +127,37 @@ else
 
             <span class="text-[10px] font-mono text-slate-400">Total: @FiltroEmpresas.Count() embarcaciones</span>
         </div>
-        @if (empresas == null)
+        
+        @if (isLoading)
         {
-            <div class="flex flex-col items-center justify-center p-12">
+            <div class="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-slate-200">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
-                <p class="mt-4 text-slate-600">Cargando embarcaciones...</p>
+                <p class="mt-4 text-slate-600 font-medium">Cargando embarcaciones...</p>
+                <p class="text-xs text-slate-400 mt-2">Por favor espere</p>
             </div>
         }
-        else{
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-red-200">
+                <span class="material-symbols-outlined text-red-500 text-5xl">error</span>
+                <p class="mt-4 text-red-600 font-medium">Error al cargar datos</p>
+                <p class="text-sm text-slate-500 mt-2">@errorMessage</p>
+                <button @onclick="async () => await OnInitializedAsync()" 
+                        class="mt-4 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    Reintentar
+                </button>
+            </div>
+        }
+        else if (empresas == null || !empresas.Any())
+        {
+            <div class="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-slate-200">
+                <span class="material-symbols-outlined text-slate-300 text-5xl">sailing</span>
+                <p class="mt-4 text-slate-600 font-medium">No hay embarcaciones registradas</p>
+                <p class="text-sm text-slate-400 mt-2">Los datos aparecerán aquí cuando se registren</p>
+            </div>
+        }
+        else
+        {
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="p-4 bg-slate-50/50 border-b border-slate-200 flex items-center justify-between">
 
@@ -313,3 +336,4 @@ else
         }
     </div>
 }
+

@@ -8,18 +8,20 @@ namespace CRM.V3.Shared.Pages
 {
     public partial class ListaBarcos : ComponentBase
     {
-        [Inject] private IApiClient<BarcosDto> servicioBarco { get; set; }
-        [Inject] private IApiClient<EmpresasDto> servicioEmpresas { get; set; }
-        [Inject] private NavigationManager NavigationManager { get; set; }
-        [Inject] private IFormFactor PlatformService { get; set; }
-        [Inject] private IPlatformNavigationService NavigationService { get; set; }
-        [Inject] private IJSRuntime js { get;set;}
+        [Inject] private IApiClient<BarcosDto> servicioBarco { get; set; } = default!;
+        [Inject] private IApiClient<EmpresasDto> servicioEmpresas { get; set; } = default!;
+        [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+        [Inject] private IFormFactor PlatformService { get; set; } = default!;
+        [Inject] private IPlatformNavigationService NavigationService { get; set; } = default!;
+        [Inject] private IJSRuntime js { get; set; } = default!;
  
         private ICollection<BarcosDto> barcos = new List<BarcosDto>();
         private ICollection<EmpresasDto> empresas = new List<EmpresasDto>();
 
-        private BarcosDto barcoSeleccionado;
+        private BarcosDto? barcoSeleccionado;
         private string _filtroBarco = string.Empty;
+        private bool isLoading = true;
+        private string? errorMessage = null;
 
         private string _emailInput = string.Empty;
         private string _emailError = string.Empty;
@@ -33,6 +35,7 @@ namespace CRM.V3.Shared.Pages
         private int TotalRegistros => FiltroEmpresas.Count();
         private int RegistroInicio => (_paginaActual - 1) * _itemsPorPagina + 1;
         private int RegistroFin => Math.Min(_paginaActual * _itemsPorPagina, TotalRegistros);
+
 
         // Propiedad que QuickGrid usará para mostrar los datos filtrados (siempre devuelve IQueryable no nulo)
         protected IQueryable<EmpresasDto> FiltroEmpresas
@@ -60,37 +63,73 @@ namespace CRM.V3.Shared.Pages
             }
         }
 
-        protected override async Task OnInitializedAsync()
+        override protected async Task OnInitializedAsync()
         {
             try
             {
+                isLoading = true;
+                errorMessage = null;
+                
+                Console.WriteLine("OnInitializedAsync: Iniciando carga de barcos...");
+                
                 await CargarBarcos();
-
-
+                
+                Console.WriteLine($"OnInitializedAsync: Carga completada. Total empresas: {empresas?.Count ?? 0}");
+                
+                isLoading = false;
+                StateHasChanged(); // Forzar actualización de UI
             }
             catch (OperationCanceledException)
             {
+                Console.WriteLine("OnInitializedAsync: Operación cancelada");
+                errorMessage = "Operación cancelada";
+                isLoading = false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"OnInitializedAsync: Error - {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                errorMessage = $"Error al cargar datos: {ex.Message}";
+                isLoading = false;
+                StateHasChanged();
             }
         }
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            //if (firstRender) 
-            //{ 
-            //    var dimensions = await js.InvokeAsync<WindowDimensions>("getWindowDimensions"); 
-            //    IsMobile = dimensions.Width < 768; 
-            //    StateHasChanged(); 
-            //}
-        }
-        public class WindowDimensions { 
-            public int Width { get; set; } 
-        }
-        
+
+
+        //protected override async Task OnInitializedAsync1()
+        //{
+        //    try
+        //    {
+        //        await CargarBarcos();
+
+
+        //    }
+        //    catch (OperationCanceledException)
+        //    {
+        //    }
+        //}
+
         private async Task CargarBarcos()
         {
-            string[] includesEmpresas = new string[] { "Barcos" };
-            var result = await servicioEmpresas.GetAllAsync("api/Empresas", null, includesEmpresas);
-            empresas = result?.ToList() ?? new List<EmpresasDto>();
+            try
+            {
+                Console.WriteLine("CargarBarcos: Iniciando llamada a API...");
+                
+                string[] includesEmpresas = new string[] { "Barcos" };
+                var result = await servicioEmpresas.GetAllAsync("api/Empresas", null, includesEmpresas);
+                
+                Console.WriteLine($"CargarBarcos: Resultado recibido. Items: {result?.Count() ?? 0}");
+                
+                empresas = result?.ToList() ?? new List<EmpresasDto>();
+                
+                Console.WriteLine($"CargarBarcos: Lista empresas asignada. Total: {empresas.Count}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"CargarBarcos: Error - {ex.Message}");
+                throw; // Re-lanzar para que OnInitializedAsync lo capture
+            }
         }
 
         // quick filter - filter globally across multiple columns with the same input
