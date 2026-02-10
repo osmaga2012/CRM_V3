@@ -1,5 +1,4 @@
 name: Deploy Blazor WASM to GitHub Pages
-
 on:
   push:
     branches:
@@ -25,29 +24,19 @@ jobs:
       - name: Checkout CRM_V3 with Submodules
         uses: actions/checkout@v4
         with:
-          # Esto descarga el código principal y el submódulo de una sola vez
           submodules: recursive
           token: ${{ secrets.API_TOKEN_GITHUB }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x' #'10.0.x'
-          #dotnet-quality: 'preview'
-
-      - name: Debug - List Projects (Para verificar rutas)
-        run: find . -name "*.csproj"
-        
-      - name: Install WASM Tools
-        # Este es el paso que te pedía el error NETSDK1147
-        run: dotnet workload install wasm-tools --ignore-failed-sources
+          dotnet-version: '9.0.x'
 
       - name: Create Symlink for CRM Folder
-        # Truco maestro: como tu .csproj busca la carpeta "CRM" pero tú tienes "CRM_REPO",
-        # creamos un acceso directo para que el compilador encuentre los archivos en ambos sitios.
+        # Mantenemos esto porque es vital para que encuentre tu lógica de negocio
         run: ln -s CRM_REPO CRM
+
       - name: Restore dependencies
-        # Usamos el asterisco para que no falle por rutas de carpetas intermedias
         run: dotnet restore CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj
 
       - name: Publish App
@@ -57,18 +46,18 @@ jobs:
           -o release \
           /p:StaticWebAssetsEnabled=true \
           /p:GHPages=true \
-          /p:BlazorEnableCompression=false
+          /p:BlazorEnableCompression=false \
+          /p:BuildCompressionFormats=None \
+          /p:PublishCompressionFormats=None
 
       - name: Fix for GitHub Pages
         run: |
-          # Evita que GitHub procese la carpeta con Jekyll
           touch release/wwwroot/.nojekyll
           
-          # Ajuste del Base Href para GitHub Pages (Nombre del repo: CRM_V3)
-          # Esto busca <base href="/" /> y lo cambia por <base href="/CRM_V3/" />
+          # Ajuste del Base Href (Asegúrate de que el nombre del repo es CRM_V3)
           sed -i 's|<base href="/" />|<base href="/CRM_V3/" />|g' release/wwwroot/index.html
           
-          # Crear una copia para manejar errores 404 en rutas de Blazor
+          # Copia para manejar el refresco de rutas (F5)
           cp release/wwwroot/index.html release/wwwroot/404.html
 
       - name: Setup Pages
