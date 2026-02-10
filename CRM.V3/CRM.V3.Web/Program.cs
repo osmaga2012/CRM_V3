@@ -1,4 +1,4 @@
-using Blazored.LocalStorage;
+ï»¿using Blazored.LocalStorage;
 using CRM.App.Web.Client.Services;
 using CRM.V3.Shared;
 using CRM.V3.Shared.Helpers;
@@ -20,7 +20,7 @@ builder.Services.AddRazorComponents()
 
 // Add device-specific services used by the CRM.App.Shared project
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
-builder.Services.AddBlazoredLocalStorage(); // Asegúrate de registrar Blazored.LocalStorage
+builder.Services.AddBlazoredLocalStorage(); // AsegÃºrate de registrar Blazored.LocalStorage
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options =>
@@ -46,21 +46,21 @@ builder.Services.AddTransient<AuthorizedHttpClientHandler>();
 
 builder.Services.AddScoped(typeof(IApiClient<>), typeof(ApiClient<>));
 
-// 5. Configuración de Autenticación
-// Registra tu implementación personalizada de AuthenticationStateProvider
+// 5. ConfiguraciÃ³n de AutenticaciÃ³n
+// Registra tu implementaciÃ³n personalizada de AuthenticationStateProvider
 
 // 6. Configura el HttpClient principal para tu API con el AuthorizedHttpClientHandler
-// Este cliente con nombre "ApiClient" será usado por servicios que necesiten autenticación (ej. AuthService y ApiClient<T>).
+// Este cliente con nombre "ApiClient" serÃ¡ usado por servicios que necesiten autenticaciÃ³n (ej. AuthService y ApiClient<T>).
 builder.Services.AddHttpClient("ApiClient", client =>
 {
-    // Asegúrate de que esta URL sea correcta y apunte a tu API de backend
-    // Lee la BaseUrl desde la configuración (ej. appsettings.json)
+    // AsegÃºrate de que esta URL sea correcta y apunte a tu API de backend
+    // Lee la BaseUrl desde la configuraciÃ³n (ej. appsettings.json)
     client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7254/");
 })
-.AddHttpMessageHandler<AuthorizedHttpClientHandler>(); // Añade tu handler autorizado
+.AddHttpMessageHandler<AuthorizedHttpClientHandler>(); // AÃ±ade tu handler autorizado
 
-// 7. Configura un HttpClient adicional *sin* el handler de autorización
-//    Este cliente con nombre "NoAuthClient" será usado internamente por AuthService para refrescar tokens
+// 7. Configura un HttpClient adicional *sin* el handler de autorizaciÃ³n
+//    Este cliente con nombre "NoAuthClient" serÃ¡ usado internamente por AuthService para refrescar tokens
 //    sin entrar en un bucle de intentar refrescar el token para la propia solicitud de refresco.
 builder.Services.AddHttpClient("NoAuthClient", client =>
 {
@@ -83,7 +83,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.MapStaticAssets(); // <--- AÑADE ESTA LÍNEA AQUÍ (Crucial para .NET 10)
+app.MapStaticAssets(); // <--- AÃ‘ADE ESTA LÃNEA AQUÃ (Crucial para .NET 10)
 app.UseAntiforgery();
 
 app.UseAuthentication();

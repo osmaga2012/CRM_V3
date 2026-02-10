@@ -1,4 +1,4 @@
-// CRM.Web/Services/CurrentUserService.cs
+﻿// CRM.Web/Services/CurrentUserService.cs
 
 using CRM.Dtos;
 using System.Security.Claims;

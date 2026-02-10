@@ -1,4 +1,4 @@
-@page "/empresa/{CodigoEmpresa}"
+Ôªø@page "/empresa/{CodigoEmpresa}"
 @inject NavigationManager NavigationManager
 @using CRM.Dtos
 @using CRM.V3.Shared.Interfaces
@@ -12,14 +12,14 @@
     ==================
     
     Vista para visualizar y gestionar:
-    - InformaciÛn general de la empresa
-    - Tr·mites del barco asociado (basados en BarcosTramitesDto)
+    - Informaci√≥n general de la empresa
+    - Tr√°mites del barco asociado (basados en BarcosTramitesDto)
     - Usuarios vinculados a la empresa (basados en UsuarioDto)
     
     Funcionalidades:
-    - Crear nuevos tr·mites para el barco
+    - Crear nuevos tr√°mites para el barco
     - Crear nuevos usuarios asociados a la empresa
-    - Visualizar estado de tr·mites por fechas (Vigentes, Por Vencer, Vencidos)
+    - Visualizar estado de tr√°mites por fechas (Vigentes, Por Vencer, Vencidos)
 *@
 
 <PageTitle>Empresa: @empresa?.NombreArmador</PageTitle>
@@ -29,7 +29,7 @@
     <div class="flex items-center justify-center min-h-screen">
         <div class="text-center">
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            <p class="mt-4 text-slate-600 dark:text-slate-400">Cargando informaciÛn...</p>
+            <p class="mt-4 text-slate-600 dark:text-slate-400">Cargando informaci√≥n...</p>
         </div>
     </div>
 }
@@ -99,12 +99,12 @@ else
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-            <!-- Total Tr·mites -->
+            <!-- Total Tr√°mites -->
             <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-sm hover:shadow-xl transition-all">
                 <div class="bg-gradient-to-br from-slate-500 to-slate-600 p-3 rounded-xl shadow-lg w-fit">
                     <span class="material-symbols-outlined text-white text-2xl">description</span>
                 </div>
-                <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-3">Total Tr·mites</p>
+                <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-3">Total Tr√°mites</p>
                 <p class="text-slate-900 dark:text-white text-3xl font-bold">@totalTramites</p>
             </div>
 
@@ -143,7 +143,7 @@ else
                 <button @onclick='() => tabActiva = "tramites"' 
                         class="flex-1 px-6 py-4 font-bold text-sm md:text-base transition-all @(tabActiva == "tramites" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
                     <span class="material-symbols-outlined align-middle mr-2">description</span>
-                    Tr·mites (@totalTramites)
+                    Tr√°mites (@totalTramites)
                 </button>
                 <button @onclick='() => tabActiva = "usuarios"' 
                         class="flex-1 px-6 py-4 font-bold text-sm md:text-base transition-all @(tabActiva == "usuarios" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
@@ -156,15 +156,15 @@ else
             <div class="p-6">
                 @if (tabActiva == "tramites")
                 {
-                    <!-- Tr·mites Tab -->
+                    <!-- Tr√°mites Tab -->
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
-                            GestiÛn de Tr·mites
+                            Gesti√≥n de Tr√°mites
                         </h3>
                         <button @onclick="MostrarFormularioTramite" 
                                 class="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-bold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
                             <span class="material-symbols-outlined">add</span>
-                            Nuevo Tr·mite
+                            Nuevo Tr√°mite
                         </button>
                     </div>
 
@@ -204,13 +204,13 @@ else
                                                 @if (esVencido)
                                                 {
                                                     <span class="text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-900/30 px-3 py-1 rounded-full whitespace-nowrap">
-                                                        Vencido hace @Math.Abs(diasRestantes) dÌas
+                                                        Vencido hace @Math.Abs(diasRestantes) d√≠as
                                                     </span>
                                                 }
                                                 else if (esPorVencer)
                                                 {
                                                     <span class="text-xs font-bold text-amber-600 bg-amber-100 dark:bg-amber-900/30 px-3 py-1 rounded-full whitespace-nowrap">
-                                                        Vence en @diasRestantes dÌas
+                                                        Vence en @diasRestantes d√≠as
                                                     </span>
                                                 }
                                                 else
@@ -238,7 +238,7 @@ else
                     {
                         <div class="flex flex-col items-center justify-center py-12 text-slate-400">
                             <span class="material-symbols-outlined text-6xl mb-3">description</span>
-                            <p class="text-sm">No hay tr·mites registrados para este barco</p>
+                            <p class="text-sm">No hay tr√°mites registrados para este barco</p>
                         </div>
                     }
                 }
@@ -324,7 +324,7 @@ else
         </div>
     </div>
 
-    <!-- Modal Nuevo Tr·mite -->
+    <!-- Modal Nuevo Tr√°mite -->
     @if (mostrarFormTramite)
     {
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" @onclick="CerrarFormularioTramite">
@@ -333,7 +333,7 @@ else
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-white flex items-center gap-2">
                             <span class="material-symbols-outlined">add_circle</span>
-                            Nuevo Tr·mite
+                            Nuevo Tr√°mite
                         </h2>
                         <button @onclick="CerrarFormularioTramite" class="text-white hover:bg-white/20 p-2 rounded-lg transition-all">
                             <span class="material-symbols-outlined">close</span>
@@ -346,12 +346,12 @@ else
                         <!-- Certificado -->
                         <div>
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                Certificado / Tr·mite *
+                                Certificado / Tr√°mite *
                             </label>
                             <input @bind="nuevoTramite.Certificado" 
                                    type="text" 
                                    class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                   placeholder="Nombre del certificado o tr·mite" />
+                                   placeholder="Nombre del certificado o tr√°mite" />
                         </div>
 
                         <!-- Fechas -->
@@ -374,7 +374,7 @@ else
                             </div>
                         </div>
 
-                        <!-- Fecha Aviso y DÌas -->
+                        <!-- Fecha Aviso y D√≠as -->
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
@@ -386,12 +386,12 @@ else
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                    DÌas de Aviso
+                                    D√≠as de Aviso
                                 </label>
                                 <input @bind="nuevoTramite.DiasAvisoTramite" 
                                        type="number" 
                                        class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                       placeholder="DÌas antes del vencimiento" />
+                                       placeholder="D√≠as antes del vencimiento" />
                             </div>
                         </div>
 
@@ -427,7 +427,7 @@ else
                         <button @onclick="GuardarTramite" 
                                 disabled="@(string.IsNullOrWhiteSpace(nuevoTramite.Certificado))"
                                 class="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl hover:from-primary/90 hover:to-blue-600/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg">
-                            Guardar Tr·mite
+                            Guardar Tr√°mite
                         </button>
                     </div>
                 </div>
@@ -476,7 +476,7 @@ else
                             </div>
                         </div>
 
-                        <!-- Email y TelÈfono -->
+                        <!-- Email y Tel√©fono -->
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
@@ -489,7 +489,7 @@ else
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                    TelÈfono
+                                    Tel√©fono
                                 </label>
                                 <input @bind="nuevoUsuario.Telefono" 
                                        type="tel" 
@@ -525,12 +525,12 @@ else
                         <!-- Password -->
                         <div>
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                ContraseÒa *
+                                Contrase√±a *
                             </label>
                             <input @bind="nuevoUsuario.PasswordHash" 
                                    type="password" 
                                    class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                   placeholder="ïïïïïïïï" />
+                                   placeholder="¬ï¬ï¬ï¬ï¬ï¬ï¬ï¬ï" />
                         </div>
 
                         <!-- Email Avisos -->
