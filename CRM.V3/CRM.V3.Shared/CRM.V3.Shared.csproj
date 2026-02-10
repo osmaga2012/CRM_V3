@@ -33,4 +33,16 @@
       <Folder Include="Helpers\Traducciones\" />
     </ItemGroup>
 
+    <!-- Build Tailwind CSS before compilation -->
+    <!-- Only runs npm install if node_modules doesn't exist -->
+    <!-- Only runs CSS build in Release configuration or when source files change -->
+    <Target Name="NpmInstall" BeforeTargets="BuildTailwindCSS" Condition="!Exists('$(MSBuildProjectDirectory)/node_modules')">
+        <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    </Target>
+    
+    <Target Name="BuildTailwindCSS" BeforeTargets="Build" 
+            Condition="'$(Configuration)' == 'Release' OR !Exists('$(MSBuildProjectDirectory)/wwwroot/css/tailwind.css')">
+        <Exec Command="npm run build:css" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    </Target>
+
 </Project>
