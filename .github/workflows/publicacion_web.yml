@@ -32,8 +32,8 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
-          dotnet-quality: 'preview'
+          dotnet-version: '9.0.x' #'10.0.x'
+          #dotnet-quality: 'preview'
 
       - name: Debug - List Projects (Para verificar rutas)
         run: find . -name "*.csproj"
