@@ -1,4 +1,4 @@
-using CRM.Dtos;
+﻿using CRM.Dtos;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components;
 
@@ -117,9 +117,9 @@ namespace CRM.V3.Shared.Pages
                 empresa = empresasResult?.FirstOrDefault(e => e.CodigoEmpresa == CodigoEmpresa);
                 Console.WriteLine($"CargarDatosBarco: Empresa encontrada = {empresa?.Empresa ?? "NULL"}");
 
-                var tramitesLst = await servicioBarcosTramites.GetAllAsync("api/BarcosTramites", "ProximoEnvioAviso is not null");
+                //var tramitesLst = await servicioBarcosTramites.GetAllAsync("api/BarcosTramites", "ProximoEnvioAviso is not null");
 
-                Console.WriteLine($"Tramites: {tramitesLst.Select(x=>x.CodigoBarco).ToList()}");
+                //Console.WriteLine($"Tramites: {tramitesLst.Select(x=>x.CodigoBarco).ToList()}");
 
                 // Cargar trámites del barco
                 if (barco.BarcosTramites != null)
