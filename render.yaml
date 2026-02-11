@@ -1,0 +1,30 @@
+﻿services:
+  - type: web
+    name: crm-v3-web
+    env: docker
+    region: oregon
+    plan: free
+    buildCommand: |
+      # Instalar .NET SDK 10
+      curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 10.0.103
+      export PATH="$PATH:$HOME/.dotnet"
+      export DOTNET_ROOT=$HOME/.dotnet
+      
+      # Restaurar cargas de trabajo necesarias
+      dotnet workload restore
+      
+      # Restaurar paquetes NuGet
+      dotnet restore CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj
+      
+      # Publicar la aplicación
+      dotnet publish CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj -c Release -o ./publish
+    startCommand: |
+      cd publish
+      dotnet CRM.V3.Web.dll
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:$PORT
+      - key: GITHUB_ACTIONS
+        value: "true"

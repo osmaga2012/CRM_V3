@@ -82,7 +82,21 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Configuración de MIME types para archivos WebAssembly
+var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+provider.Mappings[".wasm"] = "application/wasm";
+provider.Mappings[".dll"] = "application/octet-stream";
+provider.Mappings[".dat"] = "application/octet-stream";
+provider.Mappings[".json"] = "application/json";
+provider.Mappings[".js"] = "application/javascript";
+provider.Mappings[".blat"] = "application/octet-stream";
+
+app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
+{
+    ContentTypeProvider = provider
+});
+
 app.MapStaticAssets(); // <--- AÑADE ESTA LÍNEA AQUÍ (Crucial para .NET 10)
 app.UseAntiforgery();
 

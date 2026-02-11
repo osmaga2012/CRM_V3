@@ -1,0 +1,14 @@
+﻿**/.dockerignore
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/.idea
+**/.DS_Store
+**/node_modules
+**/*.md
+**/.github
+**/wwwroot/css/*.css
+!**/wwwroot/css/app.css

@@ -1,6 +1,9 @@
-# 1. SDK para compilar
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
+﻿# 1. SDK para compilar
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
+
+# Instalar cargas de trabajo necesarias para Blazor WebAssembly
+RUN dotnet workload install wasm-tools --skip-manifest-update
 
 # Copiamos los proyectos para restaurar dependencias
 COPY ["CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj", "CRM.V3/CRM.V3.Web/"]
@@ -20,12 +23,15 @@ WORKDIR "/src/CRM.V3/CRM.V3.Web"
 RUN dotnet publish "CRM.V3.Web.csproj" -c Release -o /app/publish
 
 # 2. Runtime para ejecutar
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Render usa el puerto 10000 por defecto para servicios web
-ENV ASPNETCORE_URLS=http://+:10000
-EXPOSE 10000
+# Copiar script de inicio
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
-ENTRYPOINT ["dotnet", "CRM.V3.Web.dll"]
+# Configuración para Render.com
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+ENTRYPOINT ["/app/start.sh"]
