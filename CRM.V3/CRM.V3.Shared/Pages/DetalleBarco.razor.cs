@@ -108,7 +108,7 @@ namespace CRM.V3.Shared.Pages
 
                 var tramitesLst = await servicioBarcosTramites.GetAllAsync("api/BarcosTramites");
 
-                Console.WriteLine($"Tramites: {tramitesLst.ToList()}");
+                Console.WriteLine($"Tramites: {tramitesLst.Select(x=>x.CodigoBarco).ToList()}");
 
                 // Cargar trámites del barco
                 if (barco.BarcosTramites != null)
