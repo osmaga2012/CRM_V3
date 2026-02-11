@@ -22,4 +22,4 @@ dotnet workload install wasm-tools
 
 # 4. Publicar el proyecto
 # Asegúrate de que la ruta al .csproj sea correcta según tu estructura
-dotnet publish "CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj" -c Release -o output
+dotnet dotnet publish "CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj" -c Release -o output /p:BlazorEnableCompression=false /p:BlazorEnableTimeZoneSupport=false
