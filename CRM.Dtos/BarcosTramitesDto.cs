@@ -20,6 +20,11 @@ public class BarcosTramitesDto
     public string? DocumentoPath { get; set; }
     public bool? Activo { get; set; }
     
+    // Parser properties for date handling
+    public DateOnly? FechaInicioParser => FechaInicio.HasValue ? DateOnly.FromDateTime(FechaInicio.Value) : null;
+    public DateOnly? FechaFinParser => FechaFin.HasValue ? DateOnly.FromDateTime(FechaFin.Value) : null;
+    public DateOnly? FechaAvisoParser => FechaAviso.HasValue ? DateOnly.FromDateTime(FechaAviso.Value) : null;
+    
     // Navigation properties
     public BarcosDto? Barco { get; set; }
     public EmpresasDto? Empresa { get; set; }
