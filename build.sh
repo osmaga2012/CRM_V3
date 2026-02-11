@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 set -e
 
 echo "=========================================="
@@ -11,7 +11,7 @@ curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 10.0.
 export PATH="$PATH:$HOME/.dotnet"
 export DOTNET_ROOT=$HOME/.dotnet
 
-# Verificar instalación
+# Verificar instalaci?n
 echo "Verifying .NET installation..."
 dotnet --version
 
@@ -23,12 +23,9 @@ dotnet workload restore --skip-manifest-update
 echo "Restoring NuGet packages..."
 dotnet restore CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj
 
-# Publicar como estáticos
+# Publicar como est?ticos
 echo "Publishing Blazor WebAssembly..."
-dotnet publish CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj \
-  -c Release \
-  -o publish \
-  /p:BlazorEnableCompression=false
+dotnet publish CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj -c Release -o publish /p:BlazorEnableCompression=false
 
 # Copiar archivo de redirects
 echo "Copying _redirects file..."

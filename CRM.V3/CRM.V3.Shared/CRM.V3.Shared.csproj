@@ -24,21 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../CRM_REPO/CRM.Dtos/CRM.Dtos.csproj"
+    <!-- Ruta relativa desde CRM.V3/CRM.V3.Shared/ hacia CRM_REPO/CRM.Dtos/ -->
+    <ProjectReference Include="..\..\CRM_REPO\CRM.Dtos\CRM.Dtos.csproj"
                         Condition="'$([MSBuild]::IsOSPlatform(&quot;Linux&quot;))' == 'true' OR '$(GITHUB_ACTIONS)' == 'true'" />
 
     <ProjectReference Include="C:\Users\oscar\source\repos\CRM\CRM.Dtos\CRM.Dtos.csproj"
                       Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'true' AND '$(GITHUB_ACTIONS)' != 'true'" />
-    
-    <!--<ProjectReference Include="../../CRM_REPO/CRM.Dtos/CRM.Dtos.csproj" Condition="'$(RENDER_DEPLOY)' == 'true'" />
-
-    <ProjectReference Include="C:\Users\oscar\source\repos\CRM\CRM.Dtos\CRM.Dtos.csproj" Condition="'$(RENDER_DEPLOY)' != 'true'" />-->
-    
-    <!-- Ruta para GitHub Actions -->
-    <!--<ProjectReference Include="../../CRM/CRM.Dtos/CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' == 'true'" />-->
-
-    <!-- Ruta para desarrollo local -->
-    <!--<ProjectReference Include="C:\Users\oscar\source\repos\CRM\CRM.Dtos\CRM.Dtos.csproj" Condition="'$(GITHUB_ACTIONS)' != 'true'" />-->
   </ItemGroup>
 
     <ItemGroup>
