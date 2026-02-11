@@ -116,8 +116,8 @@ namespace CRM.V3.Shared.Pages
             {
                 Console.WriteLine("CargarBarcos: Iniciando llamada a API...");
                 
-                string[] includesEmpresas = new string[] { "Barcos" };
-                var result = await servicioEmpresas.GetAllAsync("api/Empresas", null, includesEmpresas);
+                string[] includesEmpresas = new string[] { "Barco" };
+                var result = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
                 
                 Console.WriteLine($"CargarBarcos: Resultado recibido. Items: {result?.Count() ?? 0}");
                 

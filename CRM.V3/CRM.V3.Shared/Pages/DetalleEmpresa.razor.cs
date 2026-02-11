@@ -110,7 +110,7 @@ namespace CRM.V3.Shared.Pages
         {
             nuevoTramite = new BarcosTramitesDto
             {
-                CodigoBarco = barco?.CodigoBarco,
+                CodigoBarco = barco!.CodigoBarco,
                 CodigoEmpresa = empresa?.CodigoEmpresa,
                 CensoBarco = barco?.Censo ?? 0,
                 FechaCreacion = DateOnly.FromDateTime(DateTime.Now),
@@ -174,7 +174,7 @@ namespace CRM.V3.Shared.Pages
             nuevoUsuario = new UsuarioDto
             {
                 CodigoEmpresa = empresa?.CodigoEmpresa,
-                EmpresaId = empresa?.Barco?.Id,
+                //EmpresaId = empresa?.Barco?.Id,
                 Activo = true,
                 Rol = "Cliente",
                 FechaRegistro = DateTime.UtcNow

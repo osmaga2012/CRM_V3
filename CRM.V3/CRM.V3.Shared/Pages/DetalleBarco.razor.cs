@@ -58,9 +58,9 @@ namespace CRM.V3.Shared.Pages
                 isLoading = true;
 
                 // Cargar barco con trámites
-                string[] includesBarcos = new string[] { "BarcosTramites" };
+                string[] includesBarcos = new string[] { "Tramites" };
                 var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
-                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == CodigoBarco);
+                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == int.Parse(CodigoBarco));
 
                 if (barco == null)
                 {
@@ -114,7 +114,7 @@ namespace CRM.V3.Shared.Pages
             tramiteEditando = null;
             nuevoTramite = new BarcosTramitesDto
             {
-                CodigoBarco = barco?.CodigoBarco,
+                CodigoBarco = barco!.CodigoBarco,
                 CodigoEmpresa = empresa?.CodigoEmpresa,
                 CensoBarco = barco?.Censo ?? 0,
                 FechaCreacion = DateOnly.FromDateTime(DateTime.Now),
@@ -227,7 +227,7 @@ namespace CRM.V3.Shared.Pages
                 CodigoEmpresa = empresa?.CodigoEmpresa,
                 // Note: Using Barco.Id for EmpresaId to match pattern in DetalleEmpresa.razor.cs
                 // This may need review if there's a separate empresa.Id field available
-                EmpresaId = empresa?.Barco?.Id,
+                //EmpresaId = empresa?.Barco?.CodigoEmpresa,
                 Activo = true,
                 Rol = "Cliente",
                 FechaRegistro = DateTime.UtcNow
