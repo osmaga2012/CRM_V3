@@ -81,13 +81,20 @@ namespace CRM.V3.Shared.Pages
                 isLoading = true;
 
                 // Cargar barco con trámites
-                string[] includesBarcos = new string[] { "Tramites" };
+                string[] includesBarcos = new string[] { "BarcosTramites" };
                 Console.WriteLine("CargarDatosBarco: Llamando a API Barcos...");
-                var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
+
+                Dictionary<string, string> filtros = new Dictionary<string, string>
+                {
+                    { "CodigoBarco", CodigoBarco }
+                };
+
+                var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", filtros, includesBarcos);
                 Console.WriteLine($"CargarDatosBarco: Resultado API Barcos - {barcosResult?.Count() ?? 0} barcos recibidos");
                 
-                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == CodigoBarco);
-                Console.WriteLine($"CargarDatosBarco: Barco encontrado = {barco?.NombreB ?? "NULL"}");
+                // Si el filtro funciona correctamente en el backend, solo debería haber 1 resultado
+                barco = barcosResult?.FirstOrDefault();
+                Console.WriteLine($"CargarDatosBarco: Barco encontrado = {barco?.NombreB ?? "NULL"} (CodigoBarco: {barco?.CodigoBarco})");
 
                 if (barco == null)
                 {
@@ -100,7 +107,11 @@ namespace CRM.V3.Shared.Pages
                 // Cargar empresa
                 string[] includesEmpresas = new string[] { "Barco" };
                 Console.WriteLine("CargarDatosBarco: Llamando a API Empresa...");
-                var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
+                Dictionary<string, string> filtrosEmpresa = new Dictionary<string, string>
+                {
+                    { "CodigoEmpresa", CodigoEmpresa }
+                };
+                var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", filtrosEmpresa, includesEmpresas);
                 Console.WriteLine($"CargarDatosBarco: Resultado API Empresa - {empresasResult?.Count() ?? 0} empresas recibidas");
                 
                 empresa = empresasResult?.FirstOrDefault(e => e.CodigoEmpresa == CodigoEmpresa);

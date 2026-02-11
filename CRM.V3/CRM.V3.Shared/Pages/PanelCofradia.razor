@@ -357,7 +357,7 @@
             usuariosNuevos = usuarios.Count(u => u.Activo && u.FechaRegistro >= hace30Dias);
 
             // Cargar barcos con include de BarcosTramites para contar trámites
-            string[] includesBarcos = new string[] { "Tramites" };
+            string[] includesBarcos = new string[] { "BarcosTramites" };
             var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
             var barcos = barcosResult?.ToList() ?? new List<BarcosDto>();
             

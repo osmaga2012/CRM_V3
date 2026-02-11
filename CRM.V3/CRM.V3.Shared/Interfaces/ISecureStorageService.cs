@@ -10,6 +10,6 @@ namespace CRM.V3.Shared.Interfaces
     {
         Task SaveTokenAsync(string token);
         void RemoveTokenAsync();
-        Task<string> GetTokenAsync();
+        Task<string?> GetTokenAsync();
     }
 }
