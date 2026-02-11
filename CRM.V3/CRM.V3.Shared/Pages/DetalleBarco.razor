@@ -180,7 +180,8 @@ else
                                 @foreach (var tramite in tramites.OrderByDescending(t => t.FechaFin))
                                 {
                                     var hoy = DateOnly.FromDateTime(DateTime.Now);
-                                    var diasRestantes = tramite.FechaFin.DayNumber - hoy.DayNumber;
+                                    var fechaFin = tramite.FechaFinParser ?? hoy;
+                                    var diasRestantes = fechaFin.DayNumber - hoy.DayNumber;
                                     var estadoTexto = diasRestantes < 0 ? "Vencido" : (diasRestantes <= 30 ? "Por Vencer" : "Vigente");
                                     var borderClass = diasRestantes < 0 ? "border-red-500" : (diasRestantes <= 30 ? "border-amber-500" : "border-sky-500");
                                     var bgClass = diasRestantes < 0 ? "bg-red-100" : (diasRestantes <= 30 ? "bg-amber-100" : "bg-sky-100");
