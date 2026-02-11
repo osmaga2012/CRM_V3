@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace CRM.V3.Shared.Services
 {
@@ -11,6 +12,11 @@ namespace CRM.V3.Shared.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpClientFactory httpClientFactory;
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
 
         public ApiClient(HttpClient httpClient,IHttpClientFactory httpClientFactory)
         {
@@ -61,7 +67,7 @@ namespace CRM.V3.Shared.Services
                     return Enumerable.Empty<TDto>();
                 }
 
-                return await response.Content.ReadFromJsonAsync<IEnumerable<TDto>>() ?? Enumerable.Empty<TDto>();
+                return await response.Content.ReadFromJsonAsync<IEnumerable<TDto>>(_jsonOptions) ?? Enumerable.Empty<TDto>();
             }
             catch (Exception ex)
             {
@@ -75,7 +81,9 @@ namespace CRM.V3.Shared.Services
 
         public async Task<TDto?> GetByIdAsync(string endpoint, object id)
         {
-            return await _httpClient.GetFromJsonAsync<TDto>($"{endpoint}/{id}");
+            var response = await _httpClient.GetAsync($"{endpoint}/{id}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<TDto>(_jsonOptions);
         }
 
         public async Task<ResponseDto> CreateAsync(string endpoint, TDto dto)
@@ -86,7 +94,7 @@ namespace CRM.V3.Shared.Services
 
                 var response = await _httpClient.PostAsJsonAsync(endpoint, dto);
                 response.EnsureSuccessStatusCode(); // Lanza excepción si el código de estado HTTP no es de éxito
-                var ret =  await response.Content.ReadFromJsonAsync<ResponseDto>();
+                var ret =  await response.Content.ReadFromJsonAsync<ResponseDto>(_jsonOptions);
 
                 return ret;
 
@@ -105,7 +113,7 @@ namespace CRM.V3.Shared.Services
             var response = await _httpClient.PutAsJsonAsync($"{endpoint}", dto);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<ResponseDto>();
+            return await response.Content.ReadFromJsonAsync<ResponseDto>(_jsonOptions);
 
         }
 
@@ -114,7 +122,7 @@ namespace CRM.V3.Shared.Services
             var response = await _httpClient.PutAsJsonAsync($"{endpoint}/{id}", dto);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<ResponseDto>(); 
+            return await response.Content.ReadFromJsonAsync<ResponseDto>(_jsonOptions); 
             
         }
 
@@ -123,7 +131,7 @@ namespace CRM.V3.Shared.Services
             var response = await _httpClient.DeleteAsync($"{endpoint}/{id}");
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<ResponseDto>();
+            return await response.Content.ReadFromJsonAsync<ResponseDto>(_jsonOptions);
         }
 
         public async Task<ResponseDto> UploadFileAsync(string endpoint, IBrowserFile file, long maxAllowedSize = 20 * 1024 * 1024, string formFieldName = "file")
@@ -139,7 +147,7 @@ namespace CRM.V3.Shared.Services
             var response = await _httpClient.PostAsync(endpoint, content);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<ResponseDto>() ?? new ResponseDto { Success = true };
+            return await response.Content.ReadFromJsonAsync<ResponseDto>(_jsonOptions) ?? new ResponseDto { Success = true };
         }
 
     }
