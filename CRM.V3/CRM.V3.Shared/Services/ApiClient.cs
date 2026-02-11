@@ -5,9 +5,100 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CRM.V3.Shared.Services
 {
+    /// <summary>
+    /// Converter para manejar strings que vienen del servidor como números (long)
+    /// Ejemplo: "2132" -> 2132L
+    /// </summary>
+    public class StringToLongConverter : JsonConverter<long>
+    {
+        public override long Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var stringValue = reader.GetString();
+                if (long.TryParse(stringValue, out var result))
+                {
+                    return result;
+                }
+            }
+            else if (reader.TokenType == JsonTokenType.Number)
+            {
+                return reader.GetInt64();
+            }
+            
+            return 0; // Valor por defecto si no se puede convertir
+        }
+
+        public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(value);
+        }
+    }
+
+    /// <summary>
+    /// Converter para manejar strings que vienen del servidor como números (int)
+    /// Ejemplo: "123" -> 123
+    /// </summary>
+    public class StringToIntConverter : JsonConverter<int>
+    {
+        public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var stringValue = reader.GetString();
+                if (int.TryParse(stringValue, out var result))
+                {
+                    return result;
+                }
+            }
+            else if (reader.TokenType == JsonTokenType.Number)
+            {
+                return reader.GetInt32();
+            }
+            
+            return 0;
+        }
+
+        public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(value);
+        }
+    }
+
+    /// <summary>
+    /// Converter para manejar strings que vienen del servidor como números (decimal)
+    /// Ejemplo: "123.45" -> 123.45M
+    /// </summary>
+    public class StringToDecimalConverter : JsonConverter<decimal>
+    {
+        public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var stringValue = reader.GetString();
+                if (decimal.TryParse(stringValue, out var result))
+                {
+                    return result;
+                }
+            }
+            else if (reader.TokenType == JsonTokenType.Number)
+            {
+                return reader.GetDecimal();
+            }
+            
+            return 0M;
+        }
+
+        public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(value);
+        }
+    }
+
     public class ApiClient<TDto> : IApiClient<TDto> where TDto : class
     {
         private readonly HttpClient _httpClient;
@@ -15,7 +106,13 @@ namespace CRM.V3.Shared.Services
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = 
+            { 
+                new StringToLongConverter(),
+                new StringToIntConverter(),
+                new StringToDecimalConverter()
+            }
         };
 
         public ApiClient(HttpClient httpClient,IHttpClientFactory httpClientFactory)
