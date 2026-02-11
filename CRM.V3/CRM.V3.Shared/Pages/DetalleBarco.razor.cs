@@ -126,6 +126,10 @@ namespace CRM.V3.Shared.Pages
                 else
                 {
                     Console.WriteLine("CargarDatosBarco: barco.BarcosTramites es NULL");
+                    var tramites = await servicioBarcosTramites.GetAllAsync("api/BarcosTramites");
+
+                    Console.WriteLine($"Tramites: {tramites.ToList()}");
+                    
                 }
 
                 // Cargar usuarios de la empresa/barco
