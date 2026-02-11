@@ -106,9 +106,9 @@ namespace CRM.V3.Shared.Pages
                 empresa = empresasResult?.FirstOrDefault(e => e.CodigoEmpresa == CodigoEmpresa);
                 Console.WriteLine($"CargarDatosBarco: Empresa encontrada = {empresa?.Empresa ?? "NULL"}");
 
-                var tramites = await servicioBarcosTramites.GetAllAsync("api/BarcosTramites");
+                var tramitesLst = await servicioBarcosTramites.GetAllAsync("api/BarcosTramites");
 
-                Console.WriteLine($"Tramites: {tramites.ToList()}");
+                Console.WriteLine($"Tramites: {tramitesLst.ToList()}");
 
                 // Cargar trámites del barco
                 if (barco.BarcosTramites != null)
