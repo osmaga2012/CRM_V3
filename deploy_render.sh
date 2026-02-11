@@ -4,7 +4,7 @@
 set -e
 
 # 1. Instalar el SDK de .NET (Usaremos el canal 9.0 para estabilidad, o 10.0 si prefieres)
-curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 9.0 --install-dir .dotnet
+curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 10.0 --quality preview --install-dir .dotnet
 
 # 2. Configurar el PATH para usar el dotnet recién instalado
 export PATH="$PWD/.dotnet:$PATH"
