@@ -10,8 +10,7 @@ echo "Installing .NET SDK 10..."
 curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 10.0.103
 export PATH="$PATH:$HOME/.dotnet"
 export DOTNET_ROOT=$HOME/.dotnet
-# 2. Forzar actualización de submódulos (por si acaso Render no lo hizo bien)
-git submodule update --init --recursive
+
 # Verificar instalaci?n
 echo "Verifying .NET installation..."
 dotnet --version
