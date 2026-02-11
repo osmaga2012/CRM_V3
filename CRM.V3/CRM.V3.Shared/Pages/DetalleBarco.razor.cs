@@ -1,4 +1,5 @@
-﻿using CRM.Dtos;
+﻿using CRM.Dominio.Entidades;
+using CRM.Dtos;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components;
 
@@ -38,9 +39,31 @@ namespace CRM.V3.Shared.Pages
         private BarcosTramitesDto? tramiteEditando = null;
         private UsuarioDto? usuarioEditando = null;
 
-        protected override async Task OnInitializedAsync()
+        override protected async Task OnInitializedAsync()
         {
-            await CargarDatosBarco();
+            try
+            {
+                Console.WriteLine("DetalleBarco OnInitializedAsync: Iniciando carga...");
+
+                await CargarDatosBarco();
+
+                Console.WriteLine($"DetalleBarco OnInitializedAsync: Carga completada. Barco: {barco?.NombreB}, Trámites: {tramites.Count}");
+
+                isLoading = false;
+                StateHasChanged(); // Forzar actualización de UI
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("DetalleBarco OnInitializedAsync: Operación cancelada");
+                isLoading = false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DetalleBarco OnInitializedAsync: Error - {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                isLoading = false;
+                StateHasChanged();
+            }
         }
 
         protected override async Task OnParametersSetAsync()
@@ -55,15 +78,21 @@ namespace CRM.V3.Shared.Pages
         {
             try
             {
+                Console.WriteLine($"CargarDatosBarco: Iniciando para CodigoBarco={CodigoBarco}, CodigoEmpresa={CodigoEmpresa}");
                 isLoading = true;
 
                 // Cargar barco con trámites
                 string[] includesBarcos = new string[] { "Tramites" };
+                Console.WriteLine("CargarDatosBarco: Llamando a API Barcos...");
                 var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
-                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == int.Parse(CodigoBarco));
+                Console.WriteLine($"CargarDatosBarco: Resultado API Barcos - {barcosResult?.Count() ?? 0} barcos recibidos");
+                
+                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == CodigoBarco);
+                Console.WriteLine($"CargarDatosBarco: Barco encontrado = {barco?.NombreB ?? "NULL"}");
 
                 if (barco == null)
                 {
+                    Console.WriteLine("CargarDatosBarco: Barco no encontrado - finalizando");
                     isLoading = false;
                     StateHasChanged();
                     return;
@@ -71,14 +100,19 @@ namespace CRM.V3.Shared.Pages
 
                 // Cargar empresa
                 string[] includesEmpresas = new string[] { "Barco" };
+                Console.WriteLine("CargarDatosBarco: Llamando a API Empresa...");
                 var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
+                Console.WriteLine($"CargarDatosBarco: Resultado API Empresa - {empresasResult?.Count() ?? 0} empresas recibidas");
+                
                 empresa = empresasResult?.FirstOrDefault(e => e.CodigoEmpresa == CodigoEmpresa);
+                Console.WriteLine($"CargarDatosBarco: Empresa encontrada = {empresa?.Empresa ?? "NULL"}");
 
                 // Cargar trámites del barco
                 if (barco.BarcosTramites != null)
                 {
                     tramites = barco.BarcosTramites.ToList();
                     totalTramites = tramites.Count;
+                    Console.WriteLine($"CargarDatosBarco: Total de trámites = {totalTramites}");
 
                     // Clasificar trámites por fechas
                     var hoy = DateOnly.FromDateTime(DateTime.Now);
@@ -87,21 +121,31 @@ namespace CRM.V3.Shared.Pages
                     tramitesVigentes = tramites.Count(t => t.FechaFin > hoy);
                     tramitesPorVencer = tramites.Count(t => t.FechaFin > hoy && t.FechaFin <= en30Dias);
                     tramitesVencidos = tramites.Count(t => t.FechaFin <= hoy);
+                    
+                    Console.WriteLine($"CargarDatosBarco: Vigentes={tramitesVigentes}, Por Vencer={tramitesPorVencer}, Vencidos={tramitesVencidos}");
+                }
+                else
+                {
+                    Console.WriteLine("CargarDatosBarco: barco.BarcosTramites es NULL");
                 }
 
                 // Cargar usuarios de la empresa/barco
+                Console.WriteLine("CargarDatosBarco: Llamando a API Usuarios...");
                 var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", null, null);
                 usuariosBarco = usuariosResult?
                     .Where(u => u.CodigoEmpresa == CodigoEmpresa)
                     .OrderBy(u => u.Nombre)
                     .ToList() ?? new List<UsuarioDto>();
+                Console.WriteLine($"CargarDatosBarco: Total usuarios = {usuariosBarco.Count}");
 
+                Console.WriteLine("CargarDatosBarco: Carga completada exitosamente");
                 isLoading = false;
                 StateHasChanged();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al cargar datos del barco: {ex.Message}");
+                Console.WriteLine($"CargarDatosBarco: ERROR - {ex.Message}");
+                Console.WriteLine($"CargarDatosBarco: StackTrace - {ex.StackTrace}");
                 isLoading = false;
                 StateHasChanged();
             }
