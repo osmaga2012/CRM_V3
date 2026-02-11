@@ -1,7 +1,10 @@
-###############################################################################
+﻿###############################################################################
 # Set default behavior to automatically normalize line endings.
 ###############################################################################
 * text=auto
+
+# Shell scripts must always use LF (Linux/Mac line endings)
+*.sh text eol=lf
 
 ###############################################################################
 # Set default behavior for command prompt diff.
