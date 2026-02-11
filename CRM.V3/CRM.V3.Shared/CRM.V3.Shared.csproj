@@ -24,12 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Ruta relativa desde CRM.V3/CRM.V3.Shared/ hacia CRM_REPO/CRM.Dtos/ -->
-    <ProjectReference Include="..\..\CRM_REPO\CRM.Dtos\CRM.Dtos.csproj"
-                        Condition="'$([MSBuild]::IsOSPlatform(&quot;Linux&quot;))' == 'true' OR '$(GITHUB_ACTIONS)' == 'true'" />
-
-    <ProjectReference Include="C:\Users\oscar\source\repos\CRM\CRM.Dtos\CRM.Dtos.csproj"
-                      Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'true' AND '$(GITHUB_ACTIONS)' != 'true'" />
+    <!-- Reference to CRM.Dtos project in the repository root -->
+    <ProjectReference Include="..\..\CRM.Dtos\CRM.Dtos.csproj" />
   </ItemGroup>
 
     <ItemGroup>
