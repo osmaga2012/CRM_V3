@@ -1,8 +1,13 @@
+using System.Text.Json.Serialization;
+using CRM.Dtos.Converters;
+
 namespace CRM.Dtos;
 
 public class BarcosDto
 {
     public long CodigoBarco { get; set; }
+    
+    [JsonConverter(typeof(NumberToStringConverter))]
     public string? Censo { get; set; }
     public string? NombreB { get; set; }
     public string? NombreA { get; set; }
