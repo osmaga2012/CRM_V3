@@ -28,7 +28,7 @@ namespace CRM.V3.Shared.Pages
                 var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", null, null);
                 empresas = empresasResult?.ToList() ?? new List<EmpresasDto>();
 
-                // Cargar barcos para el dropdown
+                // Cargar barcos para mostrar en tabla de referencia
                 var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, null);
                 barcos = barcosResult?.ToList() ?? new List<BarcosDto>();
 
@@ -45,6 +45,8 @@ namespace CRM.V3.Shared.Pages
                 else
                 {
                     // Cargar usuario existente con datos relacionados
+                    // Nota: Usamos GetAllAsync con includes en lugar de GetByIdAsync porque
+                    // GetByIdAsync no soporta el parámetro includes para cargar navegaciones
                     string[] includes = new string[] { "Empresa", "Empresa.Barco" };
                     Dictionary<string, string> filtros = new Dictionary<string, string>
                     {
