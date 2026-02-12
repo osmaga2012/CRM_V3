@@ -44,10 +44,13 @@
                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("barcos")">
                         Centros de trabajo
                     </a>
-                    <a href="#" @onclick="NavigateToTramitesMasivos" @onclick:preventDefault 
-                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("tramites-masivos")">
-                        Trámites Masivos
-                    </a>
+                    @if (showConfigOption)
+                    {
+                        <a href="#" @onclick="NavigateToTramitesMasivos" @onclick:preventDefault 
+                           class="px-4 py-2 rounded-lg text-sm font-medium transition-colors @GetNavClass("tramites-masivos")">
+                            Trámites Masivos
+                        </a>
+                    }
                     @if (showConfigOption)
                     {
                         <a href="#" @onclick="NavigateToUsuarios" @onclick:preventDefault 

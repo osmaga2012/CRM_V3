@@ -89,11 +89,10 @@
             {
                 currentUser = await CurrentUserService.GetCurrentUserAsync(user);
                 
-                // Show configuration option only for Gestoria or Administrador roles
+                // Show configuration option only for Administrador role
                 if (currentUser != null && !string.IsNullOrEmpty(currentUser.Rol))
                 {
-                    showConfigOption = currentUser.Rol.Equals("Gestoria", StringComparison.OrdinalIgnoreCase) 
-                                    || currentUser.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+                    showConfigOption = currentUser.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
                 }
                 hasCheckedRole = true;
             }
