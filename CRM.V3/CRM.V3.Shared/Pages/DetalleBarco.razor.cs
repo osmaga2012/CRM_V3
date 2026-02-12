@@ -86,7 +86,8 @@ namespace CRM.V3.Shared.Pages
 
                 Dictionary<string, string> filtros = new Dictionary<string, string>
                 {
-                    { "CodigoBarco", CodigoBarco }
+                    { "CodigoBarco", CodigoBarco },
+                    { "CodigoEmpresa", CodigoEmpresa }
                 };
 
                 var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", filtros, includesBarcos);

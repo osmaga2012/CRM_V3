@@ -54,7 +54,11 @@ namespace CRM.V3.Shared.Pages
 
                 // Cargar empresa con include de Barco
                 string[] includesEmpresas = new string[] { "Barco" };
-                var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
+                Dictionary<string, string> filtrosEmpresa = new Dictionary<string, string>
+                {
+                    { "CodigoEmpresa", CodigoEmpresa }
+                };
+                var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", filtrosEmpresa, includesEmpresas);
                 empresa = empresasResult?.FirstOrDefault(e => e.CodigoEmpresa == CodigoEmpresa);
 
                 if (empresa == null)
@@ -68,7 +72,12 @@ namespace CRM.V3.Shared.Pages
                 if (empresa.Barco != null)
                 {
                     string[] includesBarcos = new string[] { "BarcosTramites" };
-                    var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
+                    Dictionary<string, string> filtrosBarco = new Dictionary<string, string>
+                    {
+                        { "CodigoBarco", empresa.Barco.CodigoBarco.ToString() },
+                        { "CodigoEmpresa", CodigoEmpresa }
+                    };
+                    var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", filtrosBarco, includesBarcos);
                     barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == empresa.Barco.CodigoBarco);
 
                     if (barco?.BarcosTramites != null)
