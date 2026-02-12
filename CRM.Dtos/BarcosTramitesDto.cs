@@ -20,6 +20,8 @@ public class BarcosTramitesDto
     public string? CensoBarco { get; set; }
     public DateTime? FechaCreacion { get; set; }
     public DateTime? FechaModificacion { get; set; }
+    
+    [JsonConverter(typeof(NumberToStringConverter))]
     public string? Estado { get; set; }
     public string? Observaciones { get; set; }
     public string? DocumentoPath { get; set; }
