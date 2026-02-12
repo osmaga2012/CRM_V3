@@ -1,3 +1,6 @@
+using System.Text.Json.Serialization;
+using CRM.Dtos.Converters;
+
 namespace CRM.Dtos;
 
 public class BarcosTramitesDto
@@ -12,6 +15,8 @@ public class BarcosTramitesDto
     public DateTime? FechaAviso { get; set; }
     public int? DiasAvisoTramite { get; set; }
     public string? ListaEmailsEnvioAviso { get; set; }
+    
+    [JsonConverter(typeof(NumberToStringConverter))]
     public string? CensoBarco { get; set; }
     public DateTime? FechaCreacion { get; set; }
     public DateTime? FechaModificacion { get; set; }
