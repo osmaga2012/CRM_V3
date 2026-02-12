@@ -44,6 +44,9 @@
     - path: /*.css
       name: Content-Type
       value: text/css
+    - path: /**/*.styles.css
+      name: Content-Type
+      value: text/css
     - path: /_content/**/*.css
       name: Content-Type
       value: text/css
