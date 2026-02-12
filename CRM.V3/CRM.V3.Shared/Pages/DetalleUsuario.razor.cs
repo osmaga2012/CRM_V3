@@ -16,6 +16,7 @@ namespace CRM.V3.Shared.Pages
         
         private UsuarioDto usuario = new();
         private List<EmpresasDto> empresas = new();
+        private List<BarcosDto> barcos = new();
 
         protected override async Task OnInitializedAsync()
         {
@@ -26,6 +27,10 @@ namespace CRM.V3.Shared.Pages
                 // Cargar empresas para el dropdown
                 var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", null, null);
                 empresas = empresasResult?.ToList() ?? new List<EmpresasDto>();
+
+                // Cargar barcos para el dropdown
+                var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, null);
+                barcos = barcosResult?.ToList() ?? new List<BarcosDto>();
 
                 if (esNuevo)
                 {
@@ -39,8 +44,15 @@ namespace CRM.V3.Shared.Pages
                 }
                 else
                 {
-                    // Cargar usuario existente
-                    usuario = await servicioUsuarios.GetByIdAsync($"api/Usuario/{UsuarioId}", UsuarioId);
+                    // Cargar usuario existente con datos relacionados
+                    string[] includes = new string[] { "Empresa", "Empresa.Barco" };
+                    Dictionary<string, string> filtros = new Dictionary<string, string>
+                    {
+                        { "IdUsuario", UsuarioId.ToString() }
+                    };
+                    
+                    var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", filtros, includes);
+                    usuario = usuariosResult?.FirstOrDefault();
                     
                     if (usuario == null)
                     {
