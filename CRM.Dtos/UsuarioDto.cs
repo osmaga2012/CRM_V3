@@ -4,8 +4,7 @@ public class UsuarioDto
 {
     public long IdUsuario { get; set; }
     public long Id { get; set; } // Alias for IdUsuario
-    public string? Email { get; set; }
-    public string? EMail { get; set; } // Alias for Email
+    public string? EMail { get; set; }
     public string? Password { get; set; }
     public string? PasswordHash { get; set; } // Alias for Password
     public string? Nombre { get; set; }
