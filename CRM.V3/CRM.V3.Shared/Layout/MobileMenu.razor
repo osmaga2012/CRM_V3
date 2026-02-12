@@ -57,6 +57,7 @@
 
     private bool showConfigOption = false;
     private UsuarioDto? currentUser;
+    private bool hasCheckedRole = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,7 +66,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (ShowMenu)
+        if (ShowMenu && !hasCheckedRole)
         {
             await CheckUserRole();
         }
@@ -88,6 +89,7 @@
                     showConfigOption = currentUser.Rol.Equals("Gestoria", StringComparison.OrdinalIgnoreCase) 
                                     || currentUser.Rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
                 }
+                hasCheckedRole = true;
             }
         }
         catch (Exception ex)
