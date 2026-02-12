@@ -30,7 +30,7 @@ namespace CRM.V3.Shared.Services
 
                 // LOGICA DE SEGURIDAD: 
                 // Si hay un cache pero el ID no coincide con el del token actual, ¡LIMPIAMOS!
-                if (_cachedUser != null && _cachedUser.Id != currentUserId)
+                if (_cachedUser != null && _cachedUser.Id != (long)currentUserId.GetHashCode())
                 {
                     _cachedUser = null;
                 }
@@ -68,7 +68,7 @@ namespace CRM.V3.Shared.Services
                         _cachedUser = userProfileFromApi;
 
                         // Opcional: Asegurarse de que el ID del token coincide con el ID del perfil si es crítico
-                        if (_cachedUser.Id != currentUserId)
+                        if (_cachedUser.Id != (long)currentUserId.GetHashCode())
                         {
                             Console.WriteLine("Warning: User ID from token does not match user ID from API profile.");
                         }
@@ -116,7 +116,7 @@ namespace CRM.V3.Shared.Services
 
             return new UsuarioDto
             {
-                Id = id,
+                Id = (long)id.GetHashCode(),
                 EMail = userPrincipal.FindFirst(ClaimTypes.Email)?.Value,
                 NombreUsuario = userPrincipal.FindFirst(ClaimTypes.Name)?.Value, // A veces el 'Name' claim es el nombre de usuario de Supabase
                 // = userPrincipal.FindFirst(ClaimTypes.GivenName)?.Value,
