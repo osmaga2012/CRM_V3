@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using CRM.V3.Shared.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,6 +21,19 @@ namespace CRM.V3.Shared.Providers
         private readonly IConfiguration configuration;
         private readonly AuthenticationState _anonymous;
         private readonly Timer _tokenCheckTimer;
+
+        // JSON options with converters to handle string-to-number conversions
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = 
+            { 
+                new Services.StringToLongConverter(),
+                new Services.StringToIntConverter(),
+                new Services.StringToDecimalConverter()
+            }
+        };
 
         private static readonly string[] _requiredClaims = new[]
         {
@@ -277,7 +291,9 @@ namespace CRM.V3.Shared.Providers
 
                 // Asegúrate de que UserProfileDto o un DTO similar incluya TipoUsuario.
                 // Aquí, he usado UserLoginResponseDto por simplicidad, pero lo ideal es un DTO de Perfil.
-                var profileResponse = await httpClient.GetFromJsonAsync<CRM.Dtos.UsuarioDto>(profileEndpoint);
+                var response = await httpClient.GetAsync(profileEndpoint);
+                response.EnsureSuccessStatusCode();
+                var profileResponse = await response.Content.ReadFromJsonAsync<CRM.Dtos.UsuarioDto>(_jsonOptions);
 
                 //var profileResponse = await httpClient.GetAsync(profileEndpoint);
 
