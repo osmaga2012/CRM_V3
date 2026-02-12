@@ -91,6 +91,7 @@ provider.Mappings[".dat"] = "application/octet-stream";
 provider.Mappings[".json"] = "application/json";
 provider.Mappings[".js"] = "application/javascript";
 provider.Mappings[".blat"] = "application/octet-stream";
+provider.Mappings[".css"] = "text/css";
 
 app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
 {
