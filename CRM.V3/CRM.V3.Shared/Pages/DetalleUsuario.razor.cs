@@ -68,6 +68,12 @@ namespace CRM.V3.Shared.Pages
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(usuario.Apellidos))
+            {
+                errorMessage = "Los apellidos son obligatorios";
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(usuario.NIFAcceso))
             {
                 errorMessage = "El NIF es obligatorio";
