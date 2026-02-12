@@ -70,7 +70,7 @@ else
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="material-symbols-outlined text-primary">badge</span>
-                                    <span>@empresa.NIFE</span>
+                                    <span>@empresa.CifNif</span>
                                 </div>
                                 @if (empresa.Barco != null)
                                 {
@@ -173,10 +173,13 @@ else
                         <div class="grid gap-3">
                             @foreach (var tramite in tramites.OrderByDescending(t => t.FechaCreacion))
                             {
-                                var diasRestantes = (tramite.FechaFin.ToDateTime(TimeOnly.MinValue) - DateTime.Now).Days;
-                                var esVigente = tramite.FechaFin > DateOnly.FromDateTime(DateTime.Now);
+                                var fechaFin = tramite.FechaFin.HasValue
+                                    ? tramite.FechaFin.Value
+                                    : DateOnly.MinValue;
+                                var diasRestantes = (fechaFin.ToDateTime(TimeOnly.MinValue) - DateTime.Now).Days;
+                                var esVigente = tramite.FechaFin.HasValue && tramite.FechaFin.Value > DateOnly.FromDateTime(DateTime.Now);
                                 var esPorVencer = diasRestantes > 0 && diasRestantes <= 30;
-                                var esVencido = tramite.FechaFin <= DateOnly.FromDateTime(DateTime.Now);
+                                var esVencido = tramite.FechaFin.HasValue && tramite.FechaFin.Value <= DateOnly.FromDateTime(DateTime.Now);
                                 
                                 <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:shadow-lg transition-all @(esVencido ? "bg-rose-50 dark:bg-rose-900/10 border-rose-300" : esPorVencer ? "bg-amber-50 dark:bg-amber-900/10 border-amber-300" : "bg-white dark:bg-slate-800")">
                                     <div class="flex items-start gap-4">
@@ -225,7 +228,7 @@ else
                                             {
                                                 <div class="flex items-center gap-2 mt-3 text-xs text-slate-500">
                                                     <span class="material-symbols-outlined text-sm">mail</span>
-                                                    <span>Aviso: @tramite.FechaAviso.ToString("dd/MM/yyyy") | Emails: @tramite.ListaEmailsEnvioAviso.Split(',').Length</span>
+                                                    <span>Aviso: @(tramite.FechaAviso.HasValue ? tramite.FechaAviso.Value.ToString("dd/MM/yyyy") : "") | Emails: @tramite.ListaEmailsEnvioAviso.Split(',').Length</span>
                                                 </div>
                                             }
                                         </div>
