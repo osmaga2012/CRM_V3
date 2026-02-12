@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace CRM.Dtos.Converters;
 
 /// <summary>
-/// Converter para manejar números que vienen del servidor como strings
+/// Converter para manejar números que vienen del servidor y deben ser convertidos a strings
 /// Ejemplo: 123 -> "123", 123.45 -> "123.45"
 /// </summary>
 public class NumberToStringConverter : JsonConverter<string>
@@ -25,6 +25,19 @@ public class NumberToStringConverter : JsonConverter<string>
             else if (reader.TryGetDouble(out var doubleValue))
             {
                 return doubleValue.ToString();
+            }
+            else
+            {
+                // Fallback: try to read as decimal or return string representation
+                try
+                {
+                    return reader.GetDecimal().ToString();
+                }
+                catch
+                {
+                    // Last resort: return null if unable to convert
+                    return null;
+                }
             }
         }
         else if (reader.TokenType == JsonTokenType.Null)
