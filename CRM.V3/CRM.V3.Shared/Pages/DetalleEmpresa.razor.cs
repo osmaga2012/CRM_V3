@@ -80,9 +80,9 @@ namespace CRM.V3.Shared.Pages
                         var hoy = DateOnly.FromDateTime(DateTime.Now);
                         var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
 
-                        tramitesVigentes = tramites.Count(t => t.FechaFin > hoy);
-                        tramitesPorVencer = tramites.Count(t => t.FechaFin > hoy && t.FechaFin <= en30Dias);
-                        tramitesVencidos = tramites.Count(t => t.FechaFin <= hoy);
+                        tramitesVigentes = tramites.Count(t => t.FechaFin.HasValue && DateOnly.FromDateTime(t.FechaFin.Value) > hoy);
+                        tramitesPorVencer = tramites.Count(t => t.FechaFin.HasValue && DateOnly.FromDateTime(t.FechaFin.Value) > hoy && DateOnly.FromDateTime(t.FechaFin.Value) <= en30Dias);
+                        tramitesVencidos = tramites.Count(t => t.FechaFin.HasValue && DateOnly.FromDateTime(t.FechaFin.Value) <= hoy);
                     }
                 }
 
@@ -112,8 +112,8 @@ namespace CRM.V3.Shared.Pages
             {
                 CodigoBarco = barco!.CodigoBarco,
                 CodigoEmpresa = empresa?.CodigoEmpresa,
-                CensoBarco = barco?.Censo ?? 0,
-                FechaCreacion = DateOnly.FromDateTime(DateTime.Now),
+                CensoBarco = barco?.Censo ?? string.Empty,
+                FechaCreacion = DateTime.Now,
                 ListaEmailsEnvioAviso = string.Empty,
                 DiasAvisoTramite = 30
             };
@@ -138,15 +138,18 @@ namespace CRM.V3.Shared.Pages
                 // Asegurarse de que las fechas estén configuradas
                 if (nuevoTramite.FechaInicio == default)
                 {
-                    nuevoTramite.FechaInicio = DateOnly.FromDateTime(DateTime.Now);
+                    nuevoTramite.FechaInicio = DateTime.Now;
                 }
                 if (nuevoTramite.FechaFin == default)
                 {
-                    nuevoTramite.FechaFin = DateOnly.FromDateTime(DateTime.Now.AddYears(1));
+                    nuevoTramite.FechaFin = DateTime.Now.AddYears(1);
                 }
                 if (nuevoTramite.FechaAviso == default)
                 {
-                    nuevoTramite.FechaAviso = nuevoTramite.FechaFin.AddDays(-nuevoTramite.DiasAvisoTramite);
+                    if (nuevoTramite.FechaFin.HasValue && nuevoTramite.DiasAvisoTramite.HasValue)
+                    {
+                        nuevoTramite.FechaAviso = nuevoTramite.FechaFin.Value.AddDays(-nuevoTramite.DiasAvisoTramite.Value);
+                    }
                 }
 
                 // Guardar el trámite usando el servicio

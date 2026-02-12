@@ -115,7 +115,7 @@ namespace CRM.V3.Shared.Pages
                 Console.WriteLine($"CargarDatosBarco: Resultado API Empresa - {empresasResult?.Count() ?? 0} empresas recibidas");
                 
                 empresa = empresasResult?.FirstOrDefault(e => e.CodigoEmpresa == CodigoEmpresa);
-                Console.WriteLine($"CargarDatosBarco: Empresa encontrada = {empresa?.Empresa ?? "NULL"}");
+                Console.WriteLine($"CargarDatosBarco: Empresa encontrada = {empresa?.NombreArmador ?? "NULL"}");
 
                 //var tramitesLst = await servicioBarcosTramites.GetAllAsync("api/BarcosTramites", "ProximoEnvioAviso is not null");
 
@@ -129,12 +129,12 @@ namespace CRM.V3.Shared.Pages
                     Console.WriteLine($"CargarDatosBarco: Total de trámites = {totalTramites}");
 
                     // Clasificar trámites por fechas
-                    var hoy = DateOnly.FromDateTime(DateTime.Now);
-                    var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+                    var hoy = DateTime.Now;
+                    var en30Dias = DateTime.Now.AddDays(30);
 
-                    tramitesVigentes = tramites.Count(t => t.FechaFin > hoy);
-                    tramitesPorVencer = tramites.Count(t => t.FechaFin > hoy && t.FechaFin <= en30Dias);
-                    tramitesVencidos = tramites.Count(t => t.FechaFin <= hoy);
+                    tramitesVigentes = tramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy);
+                    tramitesPorVencer = tramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy && t.FechaFin.Value <= en30Dias);
+                    tramitesVencidos = tramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value <= hoy);
                     
                     Console.WriteLine($"CargarDatosBarco: Vigentes={tramitesVigentes}, Por Vencer={tramitesPorVencer}, Vencidos={tramitesVencidos}");
                 }
@@ -176,8 +176,8 @@ namespace CRM.V3.Shared.Pages
             {
                 CodigoBarco = barco!.CodigoBarco,
                 CodigoEmpresa = empresa?.CodigoEmpresa,
-                CensoBarco = barco?.Censo ?? 0,
-                FechaCreacion = DateOnly.FromDateTime(DateTime.Now),
+                CensoBarco = barco?.Censo ?? string.Empty,
+                FechaCreacion = DateTime.Now,
                 ListaEmailsEnvioAviso = string.Empty,
                 DiasAvisoTramite = 30
             };
@@ -224,15 +224,15 @@ namespace CRM.V3.Shared.Pages
                 // Asegurarse de que las fechas estén configuradas
                 if (nuevoTramite.FechaInicio == default)
                 {
-                    nuevoTramite.FechaInicio = DateOnly.FromDateTime(DateTime.Now);
+                    nuevoTramite.FechaInicio = DateTime.Now;
                 }
                 if (nuevoTramite.FechaFin == default)
                 {
-                    nuevoTramite.FechaFin = DateOnly.FromDateTime(DateTime.Now.AddYears(1));
+                    nuevoTramite.FechaFin = DateTime.Now.AddYears(1);
                 }
-                if (nuevoTramite.FechaAviso == default)
+                if (nuevoTramite.FechaAviso == default && nuevoTramite.FechaFin.HasValue)
                 {
-                    nuevoTramite.FechaAviso = nuevoTramite.FechaFin.AddDays(-nuevoTramite.DiasAvisoTramite);
+                    nuevoTramite.FechaAviso = nuevoTramite.FechaFin.Value.AddDays(-nuevoTramite.DiasAvisoTramite ?? 30);
                 }
 
                 if (tramiteEditando != null)
@@ -262,7 +262,7 @@ namespace CRM.V3.Shared.Pages
             }
         }
 
-        private async Task EliminarTramite(Guid tramiteId)
+        private async Task EliminarTramite(long tramiteId)
         {
             try
             {
@@ -310,7 +310,6 @@ namespace CRM.V3.Shared.Pages
                 EMailAvisos = usuario.EMailAvisos,
                 Activo = usuario.Activo,
                 CodigoEmpresa = usuario.CodigoEmpresa,
-                EmpresaId = usuario.EmpresaId,
                 FechaRegistro = usuario.FechaRegistro,
                 NombreUsuario = usuario.NombreUsuario
             };
@@ -381,7 +380,7 @@ namespace CRM.V3.Shared.Pages
             }
         }
 
-        private async Task EliminarUsuario(Guid usuarioId)
+        private async Task EliminarUsuario(long usuarioId)
         {
             try
             {

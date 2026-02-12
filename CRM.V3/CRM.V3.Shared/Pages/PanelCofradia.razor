@@ -230,7 +230,7 @@
                 <div class="divide-y divide-slate-100 dark:divide-slate-800">
                     @foreach (var aviso in proximosAvisos.Take(5))
                     {
-                        var diasRestantes = (aviso.FechaAviso.ToDateTime(TimeOnly.MinValue) - DateTime.Now).Days;
+                        var diasRestantes = aviso.FechaAviso.HasValue ? (aviso.FechaAviso.Value - DateTime.Now).Days : 0;
                         var esUrgente = diasRestantes <= 7;
                         var esProximo = diasRestantes > 7 && diasRestantes <= 30;
                         
@@ -239,22 +239,22 @@
                                 @if (esUrgente)
                                 {
                                     <div class="bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 shrink-0 w-12 h-12 flex flex-col items-center justify-center rounded-xl font-bold">
-                                        <span class="text-xs">@aviso.FechaAviso.Day</span>
-                                        <span class="text-[10px] uppercase">@aviso.FechaAviso.ToString("MMM")</span>
+                                        <span class="text-xs">@aviso.FechaAviso?.Day</span>
+                                        <span class="text-[10px] uppercase">@aviso.FechaAviso?.ToString("MMM")</span>
                                     </div>
                                 }
                                 else if (esProximo)
                                 {
                                     <div class="bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shrink-0 w-12 h-12 flex flex-col items-center justify-center rounded-xl font-bold">
-                                        <span class="text-xs">@aviso.FechaAviso.Day</span>
-                                        <span class="text-[10px] uppercase">@aviso.FechaAviso.ToString("MMM")</span>
+                                        <span class="text-xs">@aviso.FechaAviso?.Day</span>
+                                        <span class="text-[10px] uppercase">@aviso.FechaAviso?.ToString("MMM")</span>
                                     </div>
                                 }
                                 else
                                 {
                                     <div class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shrink-0 w-12 h-12 flex flex-col items-center justify-center rounded-xl font-bold">
-                                        <span class="text-xs">@aviso.FechaAviso.Day</span>
-                                        <span class="text-[10px] uppercase">@aviso.FechaAviso.ToString("MMM")</span>
+                                        <span class="text-xs">@aviso.FechaAviso?.Day</span>
+                                        <span class="text-[10px] uppercase">@aviso.FechaAviso?.ToString("MMM")</span>
                                     </div>
                                 }
                                 
@@ -339,11 +339,11 @@
             
             // Calcular empresas nuevas (últimos 30 días)
             var hace30Dias = DateTime.Now.AddDays(-30);
-            empresasNuevas = empresas.Count(e => e.FechaNew >= hace30Dias);
+            empresasNuevas = empresas.Count(e => e.FechaAlta.HasValue && e.FechaAlta.Value >= hace30Dias);
             
             // Obtener empresas recientes para mostrar (ordenadas por fecha de creación)
             empresasRecientes = empresas
-                .OrderByDescending(e => e.FechaNew)
+                .OrderByDescending(e => e.FechaAlta)
                 .Take(6)
                 .ToList();
 
@@ -351,10 +351,10 @@
             var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", null, null);
             var usuarios = usuariosResult?.ToList() ?? new List<UsuarioDto>();
             
-            totalUsuarios = usuarios.Count(u => u.Activo); // Solo usuarios activos
+            totalUsuarios = usuarios.Count(u => u.Activo == true); // Solo usuarios activos
             
             // Calcular usuarios nuevos (últimos 30 días)
-            usuariosNuevos = usuarios.Count(u => u.Activo && u.FechaRegistro >= hace30Dias);
+            usuariosNuevos = usuarios.Count(u => u.Activo == true && u.FechaRegistro.HasValue && u.FechaRegistro.Value >= hace30Dias);
 
             // Cargar barcos con include de BarcosTramites para contar trámites
             string[] includesBarcos = new string[] { "BarcosTramites" };
@@ -365,8 +365,8 @@
             totalTramites = barcos.Sum(b => b.BarcosTramites?.Count ?? 0);
             
             // Clasificar trámites por fecha (sin usar estados de BD)
-            var hoy = DateOnly.FromDateTime(DateTime.Now);
-            var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+            var hoy = DateTime.Now;
+            var en30Dias = DateTime.Now.AddDays(30);
             
             // Obtener todos los trámites de todos los barcos
             var todosTramites = barcos
@@ -374,23 +374,23 @@
                 .ToList();
             
             // Vigentes: Trámites cuya fecha fin es posterior a hoy
-            tramitesVigentes = todosTramites.Count(t => t.FechaFin > hoy);
+            tramitesVigentes = todosTramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy);
             
             // Por vencer: Trámites que vencen en los próximos 30 días
-            tramitesPorVencer = todosTramites.Count(t => t.FechaFin > hoy && t.FechaFin <= en30Dias);
+            tramitesPorVencer = todosTramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy && t.FechaFin.Value <= en30Dias);
             
             // Vencidos: Trámites cuya fecha fin ya pasó
-            tramitesVencidos = todosTramites.Count(t => t.FechaFin <= hoy);
+            tramitesVencidos = todosTramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value <= hoy);
 
             // Obtener próximos avisos (trámites con fecha de aviso próxima)
             // Estos son los avisos que se enviarán por email a los barcos
             proximosAvisos = todosTramites
-                .Where(t => t.FechaAviso >= hoy)
+                .Where(t => t.FechaAviso.HasValue && t.FechaAviso.Value >= hoy)
                 .OrderBy(t => t.FechaAviso)
                 .Take(5)
                 .ToList();
             
-            avisosProximos = todosTramites.Count(t => t.FechaAviso >= hoy);
+            avisosProximos = todosTramites.Count(t => t.FechaAviso.HasValue && t.FechaAviso.Value >= hoy);
 
             isLoading = false;
             StateHasChanged();

@@ -292,7 +292,12 @@ namespace CRM.V3.Shared.Providers
                         // Si tu backend también devuelve roles, añádelos aquí:
                         // foreach (var role in profileResponse.Roles) { claims.Add(new Claim(ClaimTypes.Role, role)); }
                     };
-                    claims.Add(new Claim("tipo_usuario", profileResponse.TipoUsuario.ToString())); // ¡Claim personalizado!
+                    
+                    // Add role as custom claim if available
+                    if (!string.IsNullOrEmpty(profileResponse.Rol))
+                    {
+                        claims.Add(new Claim("tipo_usuario", profileResponse.Rol));
+                    }
 
                     var identity = new ClaimsIdentity(claims, "jwt");
                     var user = new ClaimsPrincipal(identity);
