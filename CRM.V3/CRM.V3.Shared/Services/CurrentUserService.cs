@@ -61,7 +61,7 @@ namespace CRM.V3.Shared.Services
                     // ** ¡Llamada al endpoint "perfil" de tu UsuariosController! **
                     // ************************************************************
                     // Asumo que tu HttpClient ya está configurado para añadir el token de autorización
-                    var userProfileFromApi = await _httpClient.GetFromJsonAsync<UsuarioDto>("api/Usuarios/perfil");
+                    var userProfileFromApi = await _httpClient.GetFromJsonAsync<UsuarioDto>("api/Usuarios/perfil?include=Empresa");
 
                     if (userProfileFromApi != null)
                     {
