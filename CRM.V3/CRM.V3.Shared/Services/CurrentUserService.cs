@@ -4,6 +4,8 @@ using CRM.Dtos;
 using System.Security.Claims;
 using System.Net.Http.Json;
 using CRM.V3.Shared.Interfaces;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 
 namespace CRM.V3.Shared.Services
@@ -12,6 +14,19 @@ namespace CRM.V3.Shared.Services
     {
         private readonly HttpClient _httpClient;
         private UsuarioDto _cachedUser;
+        
+        // JSON options with converters to handle string-to-number conversions
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = 
+            { 
+                new StringToLongConverter(),
+                new StringToIntConverter(),
+                new StringToDecimalConverter()
+            }
+        };
 
         public CurrentUserService(IHttpClientFactory httpClientFactory)
         {
@@ -61,7 +76,9 @@ namespace CRM.V3.Shared.Services
                     // ** ¡Llamada al endpoint "perfil" de tu UsuariosController! **
                     // ************************************************************
                     // Asumo que tu HttpClient ya está configurado para añadir el token de autorización
-                    var userProfileFromApi = await _httpClient.GetFromJsonAsync<UsuarioDto>("api/Usuarios/perfil?include=Empresa");
+                    var response = await _httpClient.GetAsync("api/Usuarios/perfil?include=Empresa");
+                    response.EnsureSuccessStatusCode();
+                    var userProfileFromApi = await response.Content.ReadFromJsonAsync<UsuarioDto>(_jsonOptions);
 
                     if (userProfileFromApi != null)
                     {
