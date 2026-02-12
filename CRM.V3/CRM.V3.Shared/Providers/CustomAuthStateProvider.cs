@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using CRM.V3.Shared.Interfaces;
+using CRM.V3.Shared.Services;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace CRM.V3.Shared.Providers
@@ -29,9 +30,9 @@ namespace CRM.V3.Shared.Providers
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters = 
             { 
-                new Services.StringToLongConverter(),
-                new Services.StringToIntConverter(),
-                new Services.StringToDecimalConverter()
+                new StringToLongConverter(),
+                new StringToIntConverter(),
+                new StringToDecimalConverter()
             }
         };
 
