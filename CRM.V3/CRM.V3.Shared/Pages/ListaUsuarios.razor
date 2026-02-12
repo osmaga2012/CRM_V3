@@ -1,0 +1,192 @@
+@page "/usuarios"
+@inject NavigationManager NavigationManager
+@using CRM.Dtos
+@using CRM.V3.Shared.Interfaces
+@inject IApiClient<UsuarioDto> servicioUsuarios
+
+<PageTitle>Gestión de Usuarios</PageTitle>
+
+@if (isLoading)
+{
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
+            <p class="mt-4 text-slate-600">Cargando usuarios...</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="w-full p-4 md:p-6 lg:p-8">
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-sky-50 to-blue-100 rounded-2xl border-2 border-sky-200 p-6 md:p-8 mb-6 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="bg-gradient-to-br from-sky-500 to-blue-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl shadow-xl">
+                        <span class="material-symbols-outlined text-4xl">group</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900">Gestión de Usuarios</h1>
+                        <p class="text-slate-600 mt-1">Administra los usuarios del sistema</p>
+                    </div>
+                </div>
+                <button @onclick="CrearNuevoUsuario"
+                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg hover:shadow-xl">
+                    <span class="material-symbols-outlined">person_add</span>
+                    <span class="hidden md:inline">Nuevo Usuario</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+            <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-slate-100 w-12 h-12 flex items-center justify-center rounded-xl">
+                        <span class="material-symbols-outlined text-slate-600 text-2xl">group</span>
+                    </div>
+                    <span class="text-3xl font-bold text-slate-900">@totalUsuarios</span>
+                </div>
+                <h3 class="text-slate-600 font-medium text-sm">Total Usuarios</h3>
+            </div>
+
+            <div class="bg-white rounded-xl border border-green-200 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-green-100 w-12 h-12 flex items-center justify-center rounded-xl">
+                        <span class="material-symbols-outlined text-green-600 text-2xl">check_circle</span>
+                    </div>
+                    <span class="text-3xl font-bold text-green-600">@usuariosActivos</span>
+                </div>
+                <h3 class="text-slate-600 font-medium text-sm">Activos</h3>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-slate-100 w-12 h-12 flex items-center justify-center rounded-xl">
+                        <span class="material-symbols-outlined text-slate-600 text-2xl">cancel</span>
+                    </div>
+                    <span class="text-3xl font-bold text-slate-600">@usuariosInactivos</span>
+                </div>
+                <h3 class="text-slate-600 font-medium text-sm">Inactivos</h3>
+            </div>
+
+            <div class="bg-white rounded-xl border border-blue-200 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-xl">
+                        <span class="material-symbols-outlined text-blue-600 text-2xl">business</span>
+                    </div>
+                    <span class="text-3xl font-bold text-blue-600">@usuariosEmpresa</span>
+                </div>
+                <h3 class="text-slate-600 font-medium text-sm">Usuarios Empresa</h3>
+            </div>
+        </div>
+
+        <!-- Filtros y búsqueda -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 mb-6 shadow-sm">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">search</span>
+                        <input @bind="searchTerm" @bind:event="oninput" @onkeyup="FiltrarUsuarios"
+                               type="text" 
+                               class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none"
+                               placeholder="Buscar por nombre, email o NIF..." />
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <select @bind="filtroEstado" @bind:after="FiltrarUsuarios"
+                            class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                        <option value="">Todos</option>
+                        <option value="activos">Activos</option>
+                        <option value="inactivos">Inactivos</option>
+                    </select>
+                    <select @bind="filtroRol" @bind:after="FiltrarUsuarios"
+                            class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
+                        <option value="">Todos los roles</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="Administrador">Administrador</option>
+                        <option value="Asistente">Asistente</option>
+                        <option value="Gestoria">Gestoria</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Usuarios -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            @if (usuariosFiltrados.Any())
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                    @foreach (var usuario in usuariosFiltrados.OrderBy(u => u.Nombre))
+                    {
+                        <div class="bg-slate-50 rounded-xl p-5 hover:shadow-lg transition-all cursor-pointer border border-slate-100"
+                             @onclick="() => VerDetalleUsuario(usuario.Id)">
+                            <div class="flex items-start gap-4">
+                                <div class="bg-gradient-to-br from-sky-500 to-blue-600 text-white w-14 h-14 flex items-center justify-center rounded-xl font-bold text-lg shrink-0">
+                                    @GetInicialesUsuario(usuario.Nombre, usuario.Apellidos)
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start justify-between gap-2 mb-2">
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="text-lg font-bold text-slate-900 truncate">
+                                                @usuario.Nombre @usuario.Apellidos
+                                            </h3>
+                                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                                <span class="px-2 py-1 bg-sky-100 text-sky-700 text-xs font-semibold rounded">
+                                                    @usuario.Rol
+                                                </span>
+                                                <span class="px-2 py-1 @((usuario.Activo == true) ? "bg-green-100 text-green-700" : "bg-slate-200 text-slate-600") text-xs font-semibold rounded">
+                                                    @((usuario.Activo == true) ? "Activo" : "Inactivo")
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button @onclick:stopPropagation="true" @onclick="() => EliminarUsuario(usuario.Id)"
+                                                class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-100 text-slate-400 hover:text-red-600 transition-all"
+                                                title="Eliminar">
+                                            <span class="material-symbols-outlined text-base">delete</span>
+                                        </button>
+                                    </div>
+                                    <div class="space-y-1 text-sm text-slate-600">
+                                        @if (!string.IsNullOrEmpty(usuario.EMail))
+                                        {
+                                            <div class="flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-base">mail</span>
+                                                <span class="truncate">@usuario.EMail</span>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(usuario.Telefono))
+                                        {
+                                            <div class="flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-base">phone</span>
+                                                <span>@usuario.Telefono</span>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(usuario.CodigoEmpresa))
+                                        {
+                                            <div class="flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-base">business</span>
+                                                <span class="text-xs">Empresa: @usuario.CodigoEmpresa</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-12">
+                    <span class="material-symbols-outlined text-6xl text-slate-300 mb-3">person_off</span>
+                    <p class="text-slate-500">No se encontraron usuarios</p>
+                    <p class="text-sm text-slate-400 mt-1">Intenta ajustar los filtros de búsqueda</p>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+
+}
