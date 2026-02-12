@@ -2,6 +2,7 @@
 using CRM.V3.Shared.Interfaces;
 using CRM.V3.Shared.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 
 namespace CRM.V3.Shared.Pages
@@ -14,6 +15,8 @@ namespace CRM.V3.Shared.Pages
         [Inject] private IFormFactor PlatformService { get; set; } = default!;
         [Inject] private IPlatformNavigationService NavigationService { get; set; } = default!;
         [Inject] private IJSRuntime js { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+        [Inject] private ICurrentUserService CurrentUserService { get; set; } = default!;
  
         private ICollection<BarcosDto> barcos = new List<BarcosDto>();
         private ICollection<EmpresasDto> empresas = new List<EmpresasDto>();
@@ -116,12 +119,26 @@ namespace CRM.V3.Shared.Pages
             {
                 Console.WriteLine("CargarBarcos: Iniciando llamada a API...");
                 
+                // Get current user to apply role-based filtering
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var currentUser = await CurrentUserService.GetCurrentUserAsync(authState.User);
+                
+                Console.WriteLine($"ListaBarcos: Current user role = {currentUser?.Rol}, CodigoEmpresa = {currentUser?.CodigoEmpresa}");
+                
                 string[] includesEmpresas = new string[] { "Barco" };
                 var result = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
                 
                 Console.WriteLine($"CargarBarcos: Resultado recibido. Items: {result?.Count() ?? 0}");
                 
                 empresas = result?.ToList() ?? new List<EmpresasDto>();
+                
+                // Filter by user's company if role is "Empresa"
+                if (currentUser?.Rol?.Equals("Empresa", StringComparison.OrdinalIgnoreCase) == true && 
+                    !string.IsNullOrEmpty(currentUser.CodigoEmpresa))
+                {
+                    empresas = empresas.Where(e => e.CodigoEmpresa == currentUser.CodigoEmpresa).ToList();
+                    Console.WriteLine($"ListaBarcos: Filtered empresas by CodigoEmpresa = {currentUser.CodigoEmpresa}, count = {empresas.Count}");
+                }
                 
                 Console.WriteLine($"CargarBarcos: Lista empresas asignada. Total: {empresas.Count}");
             }

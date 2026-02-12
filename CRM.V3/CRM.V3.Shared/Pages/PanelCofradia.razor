@@ -1,12 +1,14 @@
 ﻿@page "/"
 @* @attribute [Authorize] *@
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 @using CRM.Dtos
 @using CRM.V3.Shared.Interfaces
 @inject IApiClient<EmpresasDto> servicioEmpresas
 @inject IApiClient<BarcosDto> servicioBarcos
 @inject IApiClient<BarcosTramitesDto> servicioBarcosTramites
 @inject IApiClient<UsuarioDto> servicioUsuarios
+@inject ICurrentUserService CurrentUserService
 
 @*
     PANEL DE CONTROL - COFRADÍA
@@ -330,10 +332,24 @@
         {
             isLoading = true;
             
+            // Get current user to apply role-based filtering
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var currentUser = await CurrentUserService.GetCurrentUserAsync(authState.User);
+            
+            Console.WriteLine($"PanelCofradia: Current user role = {currentUser?.Rol}, CodigoEmpresa = {currentUser?.CodigoEmpresa}");
+            
             // Cargar empresas con include de Barco
             string[] includesEmpresas = new string[] { "Barco" };
             var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
             var empresas = empresasResult?.ToList() ?? new List<EmpresasDto>();
+            
+            // Filter by user's company if role is "Empresa"
+            if (currentUser?.Rol?.Equals("Empresa", StringComparison.OrdinalIgnoreCase) == true && 
+                !string.IsNullOrEmpty(currentUser.CodigoEmpresa))
+            {
+                empresas = empresas.Where(e => e.CodigoEmpresa == currentUser.CodigoEmpresa).ToList();
+                Console.WriteLine($"PanelCofradia: Filtered empresas by CodigoEmpresa = {currentUser.CodigoEmpresa}, count = {empresas.Count}");
+            }
             
             totalEmpresas = empresas.Count;
             
@@ -351,6 +367,14 @@
             var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", null, null);
             var usuarios = usuariosResult?.ToList() ?? new List<UsuarioDto>();
             
+            // Filter users by company if role is "Empresa"
+            if (currentUser?.Rol?.Equals("Empresa", StringComparison.OrdinalIgnoreCase) == true && 
+                !string.IsNullOrEmpty(currentUser.CodigoEmpresa))
+            {
+                usuarios = usuarios.Where(u => u.CodigoEmpresa == currentUser.CodigoEmpresa).ToList();
+                Console.WriteLine($"PanelCofradia: Filtered usuarios by CodigoEmpresa = {currentUser.CodigoEmpresa}, count = {usuarios.Count}");
+            }
+            
             totalUsuarios = usuarios.Count(u => u.Activo == true); // Solo usuarios activos
             
             // Calcular usuarios nuevos (últimos 30 días)
@@ -361,8 +385,19 @@
             var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
             var barcos = barcosResult?.ToList() ?? new List<BarcosDto>();
             
+            // Filter barcos by company if role is "Empresa" - use empresa's CodigoBarco
+            if (currentUser?.Rol?.Equals("Empresa", StringComparison.OrdinalIgnoreCase) == true && 
+                !string.IsNullOrEmpty(currentUser.CodigoEmpresa))
+            {
+                // Get the CodigoBarco values from filtered empresas
+                var codigosBarcos = empresas.Select(e => e.CodigoBarco).ToList();
+                barcos = barcos.Where(b => codigosBarcos.Contains(b.CodigoBarco)).ToList();
+                Console.WriteLine($"PanelCofradia: Filtered barcos by empresa's CodigoBarco, count = {barcos.Count}");
+            }
+            
             // Contar total de trámites desde BarcosTramites (colección en BarcosDto)
             totalTramites = barcos.Sum(b => b.BarcosTramites?.Count ?? 0);
+            Console.WriteLine($"PanelCofradia: Total tramites = {totalTramites}");
             
             // Clasificar trámites por fecha (sin usar estados de BD)
             var hoy = DateTime.Now;
