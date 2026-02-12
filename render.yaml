@@ -41,6 +41,21 @@
     - path: /_framework/*.blat
       name: Content-Type
       value: application/octet-stream
+    - path: /*.css
+      name: Content-Type
+      value: text/css
+    - path: /_content/**/*.css
+      name: Content-Type
+      value: text/css
+    - path: /*.js
+      name: Content-Type
+      value: application/javascript
+    - path: /_content/**/*.js
+      name: Content-Type
+      value: application/javascript
+    - path: /_framework/*.js
+      name: Content-Type
+      value: application/javascript
     
   envVars:
     - key: GITHUB_ACTIONS
