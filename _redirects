@@ -1,2 +1,19 @@
-﻿# Redirigir todas las rutas a index.html para SPA (Blazor WebAssembly)
+﻿# Don't redirect static assets - serve them directly
+/*.css    200
+/*.js     200
+/*.json   200
+/*.wasm   200
+/*.dll    200
+/*.dat    200
+/*.blat   200
+/*.png    200
+/*.jpg    200
+/*.jpeg   200
+/*.gif    200
+/*.svg    200
+/*.ico    200
+/_framework/*  200
+/_content/*    200
+
+# Redirigir todas las rutas a index.html para SPA (Blazor WebAssembly)
 /*    /index.html   200
