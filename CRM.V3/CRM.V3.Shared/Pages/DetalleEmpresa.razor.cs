@@ -52,8 +52,8 @@ namespace CRM.V3.Shared.Pages
             {
                 isLoading = true;
 
-                // Cargar empresa con include de Barco
-                string[] includesEmpresas = new string[] { "Barco" };
+                // Cargar empresa con include anidado: Barco y sus BarcosTramites
+                string[] includesEmpresas = new string[] { "Barco.BarcosTramites" };
                 Dictionary<string, string> filtrosEmpresa = new Dictionary<string, string>
                 {
                     { "CodigoEmpresa", CodigoEmpresa }
@@ -68,35 +68,25 @@ namespace CRM.V3.Shared.Pages
                     return;
                 }
 
-                // Cargar barco con trámites si existe
-                if (empresa.Barco != null)
+                // Obtener barco y trámites directamente desde la empresa (ya vienen con el include)
+                barco = empresa.Barco;
+                
+                if (barco?.BarcosTramites != null)
                 {
-                    string[] includesBarcos = new string[] { "BarcosTramites" };
-                    Dictionary<string, string> filtrosBarco = new Dictionary<string, string>
-                    {
-                        { "CodigoBarco", empresa.Barco.CodigoBarco.ToString() },
-                        { "CodigoEmpresa", CodigoEmpresa }
-                    };
-                    var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", filtrosBarco, includesBarcos);
-                    barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == empresa.Barco.CodigoBarco);
+                    tramites = barco.BarcosTramites.ToList();
+                    totalTramites = tramites.Count;
 
-                    if (barco?.BarcosTramites != null)
-                    {
-                        tramites = barco.BarcosTramites.ToList();
-                        totalTramites = tramites.Count;
+                    // Clasificar trámites por fechas
+                    var hoy = DateOnly.FromDateTime(DateTime.Now);
+                    var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
 
-                        // Clasificar trámites por fechas
-                        var hoy = DateOnly.FromDateTime(DateTime.Now);
-                        var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
-
-                        tramitesVigentes = tramites.Count(t => t.FechaFin.HasValue && DateOnly.FromDateTime(t.FechaFin.Value) > hoy);
-                        tramitesPorVencer = tramites.Count(t => t.FechaFin.HasValue && DateOnly.FromDateTime(t.FechaFin.Value) > hoy && DateOnly.FromDateTime(t.FechaFin.Value) <= en30Dias);
-                        tramitesVencidos = tramites.Count(t => t.FechaFin.HasValue && DateOnly.FromDateTime(t.FechaFin.Value) <= hoy);
-                    }
+                    tramitesVigentes = tramites.Count(t => t.FechaFin.HasValue && DateOnly.FromDateTime(t.FechaFin.Value) > hoy);
+                    tramitesPorVencer = tramites.Count(t => t.FechaFin.HasValue && DateOnly.FromDateTime(t.FechaFin.Value) > hoy && DateOnly.FromDateTime(t.FechaFin.Value) <= en30Dias);
+                    tramitesVencidos = tramites.Count(t => t.FechaFin.HasValue && DateOnly.FromDateTime(t.FechaFin.Value) <= hoy);
                 }
 
                 // Cargar usuarios de la empresa
-                var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", null, null);
+                var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", new Dictionary<string, string>(), Array.Empty<string>());
                 usuariosEmpresa = usuariosResult?
                     .Where(u => u.CodigoEmpresa == CodigoEmpresa)
                     .OrderBy(u => u.Nombre)
@@ -211,7 +201,7 @@ namespace CRM.V3.Shared.Pages
             try
             {
                 // Validar que el NIF no esté duplicado
-                var usuariosExistentes = await servicioUsuarios.GetAllAsync("api/Usuarios", null, null);
+                var usuariosExistentes = await servicioUsuarios.GetAllAsync("api/Usuarios", new Dictionary<string, string>(), Array.Empty<string>());
                 if (usuariosExistentes?.Any(u => u.NIFAcceso == nuevoUsuario.NIFAcceso) == true)
                 {
                     Console.WriteLine("El NIF ya está registrado");

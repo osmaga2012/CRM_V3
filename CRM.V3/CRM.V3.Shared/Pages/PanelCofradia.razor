@@ -338,8 +338,8 @@
             
             Console.WriteLine($"PanelCofradia: Current user role = {currentUser?.Rol}, CodigoEmpresa = {currentUser?.CodigoEmpresa}");
             
-            // Cargar empresas con include de Barco
-            string[] includesEmpresas = new string[] { "Barco" };
+            // Cargar empresas con include de Barco y BarcosTramites
+            string[] includesEmpresas = new string[] { "Barco.BarcosTramites" };
             var empresasResult = await servicioEmpresas.GetAllAsync("api/Empresa", null, includesEmpresas);
             var empresas = empresasResult?.ToList() ?? new List<EmpresasDto>();
             
@@ -364,7 +364,7 @@
                 .ToList();
 
             // Cargar usuarios
-            var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", null, null);
+            var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", new Dictionary<string, string>(), Array.Empty<string>());
             var usuarios = usuariosResult?.ToList() ?? new List<UsuarioDto>();
             
             // Filter users by company if role is "Empresa"
@@ -380,20 +380,13 @@
             // Calcular usuarios nuevos (últimos 30 días)
             usuariosNuevos = usuarios.Count(u => u.Activo == true && u.FechaRegistro.HasValue && u.FechaRegistro.Value >= hace30Dias);
 
-            // Cargar barcos con include de BarcosTramites para contar trámites
-            string[] includesBarcos = new string[] { "BarcosTramites" };
-            var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
-            var barcos = barcosResult?.ToList() ?? new List<BarcosDto>();
+            // Obtener barcos desde las empresas (ya vienen con el include)
+            var barcos = empresas
+                .Where(e => e.Barco != null)
+                .Select(e => e.Barco!)
+                .ToList();
             
-            // Filter barcos by company if role is "Empresa" - use empresa's CodigoBarco
-            if (currentUser?.Rol?.Equals("Empresa", StringComparison.OrdinalIgnoreCase) == true && 
-                !string.IsNullOrEmpty(currentUser.CodigoEmpresa))
-            {
-                // Get the CodigoBarco values from filtered empresas
-                var codigosBarcos = empresas.Select(e => e.CodigoBarco).ToList();
-                barcos = barcos.Where(b => codigosBarcos.Contains(b.CodigoBarco)).ToList();
-                Console.WriteLine($"PanelCofradia: Filtered barcos by empresa's CodigoBarco, count = {barcos.Count}");
-            }
+            Console.WriteLine($"PanelCofradia: Barcos from empresas = {barcos.Count}");
             
             // Contar total de trámites desde BarcosTramites (colección en BarcosDto)
             totalTramites = barcos.Sum(b => b.BarcosTramites?.Count ?? 0);
@@ -438,9 +431,12 @@
         }
     }
 
-    private void NavigateToEmpresaDetalle(string codigoEmpresa)
+    private void NavigateToEmpresaDetalle(string? codigoEmpresa)
     {
-        NavigationManager.NavigateTo($"/empresa/{codigoEmpresa}");
+        if (!string.IsNullOrEmpty(codigoEmpresa))
+        {
+            NavigationManager.NavigateTo($"/empresa/{codigoEmpresa}");
+        }
     }
 
     private void IniciarTramiteMasivo()
@@ -454,7 +450,7 @@
         return Math.Round((double)value / total * 100, 2);
     }
 
-    private string GetInicialesEmpresa(string nombreEmpresa)
+    private string GetInicialesEmpresa(string? nombreEmpresa)
     {
         if (string.IsNullOrWhiteSpace(nombreEmpresa))
             return "??";
