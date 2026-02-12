@@ -94,13 +94,13 @@ else
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <select @bind="filtroEstado" @bind:event="onchange" @onchange="FiltrarUsuarios"
+                    <select @bind="filtroEstado" @bind:after="FiltrarUsuarios"
                             class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
                         <option value="">Todos</option>
                         <option value="activos">Activos</option>
                         <option value="inactivos">Inactivos</option>
                     </select>
-                    <select @bind="filtroRol" @bind:event="onchange" @onchange="FiltrarUsuarios"
+                    <select @bind="filtroRol" @bind:after="FiltrarUsuarios"
                             class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none">
                         <option value="">Todos los roles</option>
                         <option value="Cliente">Cliente</option>
