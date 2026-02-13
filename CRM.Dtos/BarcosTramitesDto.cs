@@ -7,6 +7,15 @@ public class BarcosTramitesDto
 {
     public long Id { get; set; }
     public long CodigoBarco1 { get; set; }
+    
+    // Alias for backward compatibility - maps to CodigoBarco1
+    [JsonIgnore]
+    public long CodigoBarco
+    {
+        get => CodigoBarco1;
+        set => CodigoBarco1 = value;
+    }
+    
     public string? CodigoEmpresa { get; set; }
     public string? Certificado { get; set; }
     public string? TipoTramite { get; set; }

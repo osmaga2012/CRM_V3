@@ -100,7 +100,7 @@ namespace CRM.V3.Shared.Pages
                 Console.WriteLine($"CargarDatosBarco: Resultado API Barcos - {barcosResult?.Count() ?? 0} barcos recibidos");
                 
                 // Filtrar en el cliente por CodigoBarco
-                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == codigoBarcoLong.ToString());
+                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == codigoBarcoLong);
                 Console.WriteLine($"CargarDatosBarco: Barco encontrado = {barco?.NombreB ?? "NULL"} (CodigoBarco: {barco?.CodigoBarco})");
 
                 if (barco == null)
@@ -139,7 +139,7 @@ namespace CRM.V3.Shared.Pages
                     var hoy = DateTime.Now;
                     var en30Dias = DateTime.Now.AddDays(30);
 
-                    tramitesVigentes = tramites.Count(t => t.FechaFin && t.FechaFin > hoy);
+                    tramitesVigentes = tramites.Count(t => t.FechaFin.HasValue && t.FechaFin > hoy);
                     tramitesPorVencer = tramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy && t.FechaFin.Value <= en30Dias);
                     tramitesVencidos = tramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value <= hoy);
                     
@@ -183,7 +183,7 @@ namespace CRM.V3.Shared.Pages
             {
                 CodigoBarco = barco!.CodigoBarco,
                 CodigoEmpresa = empresa?.CodigoEmpresa,
-                CensoBarco = barco.Censo.Value,
+                CensoBarco = barco.Censo,
                 FechaCreacion = DateTime.Now,
                 ListaEmailsEnvioAviso = string.Empty,
                 DiasAvisoTramite = 30
