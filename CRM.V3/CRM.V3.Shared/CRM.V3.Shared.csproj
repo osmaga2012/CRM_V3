@@ -23,11 +23,6 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Reference to CRM.Dtos project in the repository root -->
-    <ProjectReference Include="..\..\CRM.Dtos\CRM.Dtos.csproj" />
-  </ItemGroup>
-
     <ItemGroup>
       <Folder Include="Helpers\Traducciones\" />
     </ItemGroup>
@@ -39,8 +34,7 @@
         <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" />
     </Target>
     
-    <Target Name="BuildTailwindCSS" BeforeTargets="Build" 
-            Condition="'$(Configuration)' == 'Release' OR !Exists('$(MSBuildProjectDirectory)/wwwroot/css/tailwind.css')">
+    <Target Name="BuildTailwindCSS" BeforeTargets="Build" Condition="'$(Configuration)' == 'Release' OR !Exists('$(MSBuildProjectDirectory)/wwwroot/css/tailwind.css')">
         <Exec Command="npm run build:css" WorkingDirectory="$(MSBuildProjectDirectory)" />
     </Target>
 
