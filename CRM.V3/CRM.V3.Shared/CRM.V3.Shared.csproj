@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\CRM_REPO\CRM.Dtos\CRM.Dtos.csproj" />
+      <ProjectReference Include="..\..\CRM.Dtos\CRM.Dtos.csproj" />
     </ItemGroup>
 
     <!-- Build Tailwind CSS before compilation -->
