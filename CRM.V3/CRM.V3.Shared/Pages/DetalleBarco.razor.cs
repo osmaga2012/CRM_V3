@@ -81,20 +81,25 @@ namespace CRM.V3.Shared.Pages
                 isLoading = true;
 
                 // Cargar barco con trámites
+                // Nota: BarcosDto no tiene CodigoEmpresa, solo se filtra por CodigoBarco
                 string[] includesBarcos = new string[] { "BarcosTramites" };
                 Console.WriteLine("CargarDatosBarco: Llamando a API Barcos...");
 
-                Dictionary<string, string> filtros = new Dictionary<string, string>
+                // Convertir el CodigoBarco de string a long
+                if (!long.TryParse(CodigoBarco, out long codigoBarcoLong))
                 {
-                    { "CodigoBarco", CodigoBarco },
-                    { "CodigoEmpresa", CodigoEmpresa }
-                };
+                    Console.WriteLine($"CargarDatosBarco: ERROR - CodigoBarco no es válido: {CodigoBarco}");
+                    isLoading = false;
+                    StateHasChanged();
+                    return;
+                }
 
-                var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", filtros, includesBarcos);
+                // Cargar todos los barcos con trámites y filtrar en el cliente
+                var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
                 Console.WriteLine($"CargarDatosBarco: Resultado API Barcos - {barcosResult?.Count() ?? 0} barcos recibidos");
                 
-                // Si el filtro funciona correctamente en el backend, solo debería haber 1 resultado
-                barco = barcosResult?.FirstOrDefault();
+                // Filtrar en el cliente por CodigoBarco
+                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == codigoBarcoLong);
                 Console.WriteLine($"CargarDatosBarco: Barco encontrado = {barco?.NombreB ?? "NULL"} (CodigoBarco: {barco?.CodigoBarco})");
 
                 if (barco == null)
@@ -236,7 +241,7 @@ namespace CRM.V3.Shared.Pages
                     nuevoTramite.FechaAviso = nuevoTramite.FechaFin.Value.AddDays(-nuevoTramite.DiasAvisoTramite ?? 30);
                 }
 
-                if (tramiteEditando != null)
+                if (tramiteEditando != null && nuevoTramite.Id > 0)
                 {
                     // Actualizar trámite existente
                     var resultado = await servicioBarcosTramites.UpdateAsync($"api/BarcosTramite/{nuevoTramite.Id}", nuevoTramite);

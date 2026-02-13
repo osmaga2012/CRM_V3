@@ -13,13 +13,14 @@
     
     Vista para visualizar y gestionar:
     - Información general de la empresa
-    - Trámites del barco asociado (basados en BarcosTramitesDto)
+    - Barcos asociados a la empresa (basados en BarcosDto)
     - Usuarios vinculados a la empresa (basados en UsuarioDto)
     
     Funcionalidades:
-    - Crear nuevos trámites para el barco
-    - Crear nuevos usuarios asociados a la empresa
-    - Visualizar estado de trámites por fechas (Vigentes, Por Vencer, Vencidos)
+    - CRUD completo de barcos de la empresa
+    - CRUD completo de usuarios asociados a la empresa
+    - Visualizar estadísticas de trámites de todos los barcos
+    - Navegación a DetalleBarco.razor para gestionar trámites específicos
 *@
 
 <PageTitle>Empresa: @empresa?.NombreArmador</PageTitle>
@@ -72,13 +73,10 @@ else
                                     <span class="material-symbols-outlined text-primary">badge</span>
                                     <span>@empresa.CifNif</span>
                                 </div>
-                                @if (empresa.Barco != null)
-                                {
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-primary">directions_boat</span>
-                                        <span>@empresa.Barco.NombreB (@empresa.Barco.Matricula)</span>
-                                    </div>
-                                }
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">directions_boat</span>
+                                    <span>@totalBarcos barco@(totalBarcos != 1 ? "s" : "")</span>
+                                </div>
                             </div>
                         </div>
                         <button @onclick='() => NavigationManager.NavigateTo("/barcos")' 
@@ -99,8 +97,17 @@ else
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-            <!-- Total Trámites -->
+            <!-- Total Barcos -->
             <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-sm hover:shadow-xl transition-all">
+                <div class="bg-gradient-to-br from-sky-500 to-blue-600 p-3 rounded-xl shadow-lg w-fit">
+                    <span class="material-symbols-outlined text-white text-2xl">directions_boat</span>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-3">Total Barcos</p>
+                <p class="text-slate-900 dark:text-white text-3xl font-bold">@totalBarcos</p>
+            </div>
+
+            <!-- Total Trámites -->
+            <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/30 dark:to-slate-800/30 shadow-sm hover:shadow-xl transition-all">
                 <div class="bg-gradient-to-br from-slate-500 to-slate-600 p-3 rounded-xl shadow-lg w-fit">
                     <span class="material-symbols-outlined text-white text-2xl">description</span>
                 </div>
@@ -108,16 +115,7 @@ else
                 <p class="text-slate-900 dark:text-white text-3xl font-bold">@totalTramites</p>
             </div>
 
-            <!-- Vigentes -->
-            <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 shadow-sm hover:shadow-xl transition-all">
-                <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg w-fit">
-                    <span class="material-symbols-outlined text-white text-2xl">check_circle</span>
-                </div>
-                <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-3">Vigentes</p>
-                <p class="text-blue-900 dark:text-blue-200 text-3xl font-bold">@tramitesVigentes</p>
-            </div>
-
-            <!-- Por Vencer -->
+            <!-- Trámites Por Vencer -->
             <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 shadow-sm hover:shadow-xl transition-all">
                 <div class="bg-gradient-to-br from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg w-fit">
                     <span class="material-symbols-outlined text-white text-2xl">schedule</span>
@@ -126,7 +124,7 @@ else
                 <p class="text-amber-900 dark:text-amber-200 text-3xl font-bold">@tramitesPorVencer</p>
             </div>
 
-            <!-- Vencidos -->
+            <!-- Trámites Vencidos -->
             <div class="flex flex-col gap-1 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-800/30 shadow-sm hover:shadow-xl transition-all">
                 <div class="bg-gradient-to-br from-rose-500 to-rose-600 p-3 rounded-xl shadow-lg w-fit">
                     <span class="material-symbols-outlined text-white text-2xl">error</span>
@@ -140,10 +138,10 @@ else
         <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <!-- Tab Headers -->
             <div class="flex border-b border-slate-200 dark:border-slate-800">
-                <button @onclick='() => tabActiva = "tramites"' 
-                        class="flex-1 px-6 py-4 font-bold text-sm md:text-base transition-all @(tabActiva == "tramites" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
-                    <span class="material-symbols-outlined align-middle mr-2">description</span>
-                    Trámites (@totalTramites)
+                <button @onclick='() => tabActiva = "barcos"' 
+                        class="flex-1 px-6 py-4 font-bold text-sm md:text-base transition-all @(tabActiva == "barcos" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
+                    <span class="material-symbols-outlined align-middle mr-2">directions_boat</span>
+                    Barcos (@totalBarcos)
                 </button>
                 <button @onclick='() => tabActiva = "usuarios"' 
                         class="flex-1 px-6 py-4 font-bold text-sm md:text-base transition-all @(tabActiva == "usuarios" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
@@ -154,83 +152,104 @@ else
 
             <!-- Tab Content -->
             <div class="p-6">
-                @if (tabActiva == "tramites")
+                @if (tabActiva == "barcos")
                 {
-                    <!-- Trámites Tab -->
+                    <!-- Barcos Tab -->
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
-                            Gestión de Trámites
+                            Barcos de la Empresa
                         </h3>
-                        <button @onclick="MostrarFormularioTramite" 
+                        <button @onclick="MostrarFormularioBarco" 
                                 class="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-bold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
                             <span class="material-symbols-outlined">add</span>
-                            Nuevo Trámite
+                            Nuevo Barco
                         </button>
                     </div>
 
-                    @if (tramites.Any())
+                    @if (barcosEmpresa.Any())
                     {
-                        <div class="grid gap-3">
-                            @foreach (var tramite in tramites.OrderByDescending(t => t.FechaCreacion))
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach (var barco in barcosEmpresa)
                             {
-                                var fechaFin = tramite.FechaFin.HasValue
-                                    ? tramite.FechaFin.Value
-                                    : DateTime.MinValue;
-                                var diasRestantes = (fechaFin.Date - DateTime.Now.Date).Days;
-                                var esVigente = tramite.FechaFin.HasValue && tramite.FechaFin > DateTime.Now;
-                                var esPorVencer = diasRestantes > 0 && diasRestantes <= 30;
-                                var esVencido = tramite.FechaFin.HasValue && tramite.FechaFin <= DateTime.Now;
+                                var tramitesBarco = barco.BarcosTramites?.Count ?? 0;
+                                var hoy = DateTime.Now;
+                                var tramitesVigentesBarco = barco.BarcosTramites?.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy) ?? 0;
+                                var tramitesPorVencerBarco = barco.BarcosTramites?.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy && t.FechaFin.Value <= hoy.AddDays(30)) ?? 0;
+                                var tramitesVencidosBarco = barco.BarcosTramites?.Count(t => t.FechaFin.HasValue && t.FechaFin.Value <= hoy) ?? 0;
                                 
-                                <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:shadow-lg transition-all @(esVencido ? "bg-rose-50 dark:bg-rose-900/10 border-rose-300" : esPorVencer ? "bg-amber-50 dark:bg-amber-900/10 border-amber-300" : "bg-white dark:bg-slate-800")">
+                                <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:shadow-xl transition-all cursor-pointer group" @onclick="() => NavegarADetalleBarco(barco.CodigoBarco)">
                                     <div class="flex items-start gap-4">
-                                        <div class="@(esVencido ? "bg-rose-500" : esPorVencer ? "bg-amber-500" : "bg-blue-500") text-white shrink-0 w-14 h-14 flex flex-col items-center justify-center rounded-xl font-bold shadow-lg">
-                                            <span class="text-xs">@tramite.FechaFin?.Day</span>
-                                            <span class="text-[10px] uppercase">@tramite.FechaFin.Value.ToString("MMM", System.Globalization.CultureInfo.InvariantCulture)</span>
+                                        <div class="bg-gradient-to-br from-sky-500 to-blue-600 text-white shrink-0 w-16 h-16 flex items-center justify-center rounded-xl font-bold text-xl shadow-lg">
+                                            <span class="material-symbols-outlined text-3xl">directions_boat</span>
                                         </div>
                                         
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-start justify-between gap-2">
-                                                <div>
-                                                    <h4 class="font-bold text-slate-900 dark:text-white text-base md:text-lg">
-                                                        @tramite.Certificado
+                                                <div class="flex-1">
+                                                    <h4 class="font-bold text-slate-900 dark:text-white text-lg group-hover:text-primary transition-colors">
+                                                        @barco.NombreB
                                                     </h4>
-                                                    <p class="text-sm text-slate-500 mt-1">
-                                                        Inicio: @tramite.FechaInicio?.ToShortDateString() | 
-                                                        Fin: @tramite.FechaFin?.ToShortDateString()
-                                                    </p>
-                                                    @if (!string.IsNullOrEmpty(tramite.Observaciones))
+                                                    <div class="flex flex-wrap items-center gap-3 mt-2 text-sm text-slate-500">
+                                                        <div class="flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-xs">tag</span>
+                                                            <span class="font-mono">@barco.Matricula</span>
+                                                        </div>
+                                                        <div class="flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-xs">badge</span>
+                                                            <span>@barco.CodigoBarco</span>
+                                                        </div>
+                                                        @if (!string.IsNullOrEmpty(barco.Puerto))
+                                                        {
+                                                            <div class="flex items-center gap-1">
+                                                                <span class="material-symbols-outlined text-xs">anchor</span>
+                                                                <span>@barco.Puerto</span>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    @if (!string.IsNullOrEmpty(barco.CapitanNombre))
                                                     {
-                                                        <p class="text-xs text-slate-400 mt-2">@tramite.Observaciones</p>
+                                                        <div class="flex items-center gap-1 mt-2 text-xs text-slate-400">
+                                                            <span class="material-symbols-outlined text-xs">person</span>
+                                                            <span>Capitán: @barco.CapitanNombre</span>
+                                                        </div>
                                                     }
                                                 </div>
                                                 
-                                                @if (esVencido)
-                                                {
-                                                    <span class="text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-900/30 px-3 py-1 rounded-full whitespace-nowrap">
-                                                        Vencido hace @Math.Abs(diasRestantes) días
-                                                    </span>
-                                                }
-                                                else if (esPorVencer)
-                                                {
-                                                    <span class="text-xs font-bold text-amber-600 bg-amber-100 dark:bg-amber-900/30 px-3 py-1 rounded-full whitespace-nowrap">
-                                                        Vence en @diasRestantes días
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-xs font-bold text-blue-600 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full whitespace-nowrap">
-                                                        Vigente
-                                                    </span>
-                                                }
+                                                <div class="flex gap-1">
+                                                    <button @onclick="() => EditarBarco(barco)" @onclick:stopPropagation
+                                                            class="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 transition-all border border-amber-200"
+                                                            title="Editar barco">
+                                                        <span class="material-symbols-outlined text-base">edit</span>
+                                                    </button>
+                                                    <button @onclick="() => EliminarBarco(barco.CodigoBarco)" @onclick:stopPropagation
+                                                            class="w-8 h-8 rounded-lg flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-all border border-red-200"
+                                                            title="Eliminar barco">
+                                                        <span class="material-symbols-outlined text-base">delete</span>
+                                                    </button>
+                                                </div>
                                             </div>
                                             
-                                            @if (!string.IsNullOrEmpty(tramite.ListaEmailsEnvioAviso))
-                                            {
-                                                <div class="flex items-center gap-2 mt-3 text-xs text-slate-500">
-                                                    <span class="material-symbols-outlined text-sm">mail</span>
-                                                    <span>Aviso: @(tramite.FechaAviso.HasValue ? tramite.FechaAviso.Value.ToString("dd/MM/yyyy") : "") | Emails: @tramite.ListaEmailsEnvioAviso.Split(',').Length</span>
+                                            <!-- Estadísticas de trámites del barco -->
+                                            <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                                                <div class="grid grid-cols-4 gap-2 text-center">
+                                                    <div>
+                                                        <div class="text-lg font-bold text-slate-900 dark:text-white">@tramitesBarco</div>
+                                                        <div class="text-[10px] text-slate-500 uppercase">Total</div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-lg font-bold text-blue-600">@tramitesVigentesBarco</div>
+                                                        <div class="text-[10px] text-slate-500 uppercase">Vigentes</div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-lg font-bold text-amber-600">@tramitesPorVencerBarco</div>
+                                                        <div class="text-[10px] text-slate-500 uppercase">Por Vencer</div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-lg font-bold text-rose-600">@tramitesVencidosBarco</div>
+                                                        <div class="text-[10px] text-slate-500 uppercase">Vencidos</div>
+                                                    </div>
                                                 </div>
-                                            }
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -240,8 +259,11 @@ else
                     else
                     {
                         <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-                            <span class="material-symbols-outlined text-6xl mb-3">description</span>
-                            <p class="text-sm">No hay trámites registrados para este barco</p>
+                            <span class="material-symbols-outlined text-6xl mb-3">directions_boat</span>
+                            <p class="text-sm">No hay barcos registrados para esta empresa</p>
+                            <button @onclick="MostrarFormularioBarco" class="mt-4 text-primary hover:underline text-sm font-semibold">
+                                Agregar primer barco
+                            </button>
                         </div>
                     }
                 }
@@ -327,18 +349,18 @@ else
         </div>
     </div>
 
-    <!-- Modal Nuevo Trámite -->
-    @if (mostrarFormTramite)
+    <!-- Modal Nuevo/Editar Barco -->
+    @if (mostrarFormBarco)
     {
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" @onclick="CerrarFormularioTramite">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" @onclick="CerrarFormularioBarco">
             <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" @onclick:stopPropagation>
                 <div class="sticky top-0 bg-gradient-to-r from-primary to-blue-600 p-6 rounded-t-2xl">
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-                            <span class="material-symbols-outlined">add_circle</span>
-                            Nuevo Trámite
+                            <span class="material-symbols-outlined">@(barcoEditando != null ? "edit" : "add_circle")</span>
+                            @(barcoEditando != null ? "Editar Barco" : "Nuevo Barco")
                         </h2>
-                        <button @onclick="CerrarFormularioTramite" class="text-white hover:bg-white/20 p-2 rounded-lg transition-all">
+                        <button @onclick="CerrarFormularioBarco" class="text-white hover:bg-white/20 p-2 rounded-lg transition-all">
                             <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
@@ -346,91 +368,93 @@ else
                 
                 <div class="p-6">
                     <div class="space-y-4">
-                        <!-- Certificado -->
+                        <!-- Nombre del Barco -->
                         <div>
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                Certificado / Trámite *
+                                Nombre del Barco *
                             </label>
-                            <input @bind="nuevoTramite.Certificado" 
+                            <input @bind="nuevoBarco.NombreB" 
                                    type="text" 
                                    class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                   placeholder="Nombre del certificado o trámite" />
+                                   placeholder="Nombre del barco" />
                         </div>
 
-                        <!-- Fechas -->
+                        <!-- Código y Matrícula -->
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                    Fecha Inicio *
+                                    Código Barco *
                                 </label>
-                                <input @bind="nuevoTramite.FechaInicio" 
-                                       type="date" 
-                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                    Fecha Fin *
-                                </label>
-                                <input @bind="nuevoTramite.FechaFin" 
-                                       type="date" 
-                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
-                            </div>
-                        </div>
-
-                        <!-- Fecha Aviso y Días -->
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                    Fecha Aviso
-                                </label>
-                                <input @bind="nuevoTramite.FechaAviso" 
-                                       type="date" 
-                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                    Días de Aviso
-                                </label>
-                                <input @bind="nuevoTramite.DiasAvisoTramite" 
+                                <input @bind="nuevoBarco.CodigoBarco" 
                                        type="number" 
                                        class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                       placeholder="Días antes del vencimiento" />
+                                       placeholder="Código único (número)" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Matrícula *
+                                </label>
+                                <input @bind="nuevoBarco.Matricula" 
+                                       type="text" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                       placeholder="Número de matrícula" />
                             </div>
                         </div>
 
-                        <!-- Emails para avisos -->
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                Emails para Avisos (separados por coma)
-                            </label>
-                            <input @bind="nuevoTramite.ListaEmailsEnvioAviso" 
-                                   type="text" 
-                                   class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                   placeholder="email1@ejemplo.com, email2@ejemplo.com" />
+                        <!-- Censo y Puerto -->
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Censo
+                                </label>
+                                <input @bind="nuevoBarco.Censo" 
+                                       type="text" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                       placeholder="Número de censo" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                    Puerto
+                                </label>
+                                <input @bind="nuevoBarco.Puerto" 
+                                       type="text" 
+                                       class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                       placeholder="Puerto de amarre" />
+                            </div>
                         </div>
 
-                        <!-- Observaciones -->
+                        <!-- Capitán -->
                         <div>
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                                Observaciones
+                                Nombre del Capitán
                             </label>
-                            <textarea @bind="nuevoTramite.Observaciones" 
-                                      rows="3"
-                                      class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                      placeholder="Notas adicionales..."></textarea>
+                            <input @bind="nuevoBarco.CapitanNombre" 
+                                   type="text" 
+                                   class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                   placeholder="Nombre completo del capitán" />
+                        </div>
+
+                        <!-- Fecha Alta -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                Fecha de Alta
+                            </label>
+                            <input @bind="nuevoBarco.FechaAlta" 
+                                   type="date" 
+                                   class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
                         </div>
                     </div>
 
                     <!-- Botones -->
                     <div class="flex gap-3 mt-6">
-                        <button @onclick="CerrarFormularioTramite" 
+                        <button @onclick="CerrarFormularioBarco" 
                                 class="flex-1 px-6 py-3 border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                             Cancelar
                         </button>
-                        <button @onclick="GuardarTramite" 
-                                disabled="@(string.IsNullOrWhiteSpace(nuevoTramite.Certificado))"
+                        <button @onclick="GuardarBarco" 
+                                disabled="@(string.IsNullOrWhiteSpace(nuevoBarco.NombreB) || nuevoBarco.CodigoBarco == 0)"
                                 class="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl hover:from-primary/90 hover:to-blue-600/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg">
-                            Guardar Trámite
+                            @(barcoEditando != null ? "Actualizar Barco" : "Crear Barco")
                         </button>
                     </div>
                 </div>
