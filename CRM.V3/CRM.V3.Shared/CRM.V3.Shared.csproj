@@ -27,6 +27,10 @@
       <Folder Include="Helpers\Traducciones\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\CRM_REPO\CRM.Dtos\CRM.Dtos.csproj" />
+    </ItemGroup>
+
     <!-- Build Tailwind CSS before compilation -->
     <!-- Only runs npm install if node_modules doesn't exist -->
     <!-- Only runs CSS build in Release configuration or when source files change -->

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿using CRM.Dtos.Response;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace CRM.V3.Shared.Interfaces
 {
