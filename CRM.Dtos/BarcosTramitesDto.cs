@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using CRM.Dtos.Converters;
 
 namespace CRM.Dtos;
@@ -6,7 +6,7 @@ namespace CRM.Dtos;
 public class BarcosTramitesDto
 {
     public long Id { get; set; }
-    public long CodigoBarco { get; set; }
+    public long CodigoBarco1 { get; set; }
     public string? CodigoEmpresa { get; set; }
     public string? Certificado { get; set; }
     public string? TipoTramite { get; set; }
