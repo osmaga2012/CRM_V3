@@ -1,5 +1,4 @@
-﻿
-using CRM.Dtos;
+﻿using CRM.Dtos;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components;
 
@@ -100,7 +99,7 @@ namespace CRM.V3.Shared.Pages
                 Console.WriteLine($"CargarDatosBarco: Resultado API Barcos - {barcosResult?.Count() ?? 0} barcos recibidos");
                 
                 // Filtrar en el cliente por CodigoBarco
-                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == codigoBarcoLong);
+                barco = barcosResult?.FirstOrDefault(b => b.CodigoBarco == codigoBarcoLong.ToString());
                 Console.WriteLine($"CargarDatosBarco: Barco encontrado = {barco?.NombreB ?? "NULL"} (CodigoBarco: {barco?.CodigoBarco})");
 
                 if (barco == null)
@@ -139,17 +138,15 @@ namespace CRM.V3.Shared.Pages
                     var hoy = DateTime.Now;
                     var en30Dias = DateTime.Now.AddDays(30);
 
-                    tramitesVigentes = tramites.Count(t => t.FechaFin.HasValue && t.FechaFin > hoy);
-                    tramitesPorVencer = tramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy && t.FechaFin.Value <= en30Dias);
-                    tramitesVencidos = tramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value <= hoy);
-                    
+                    tramitesVigentes = tramites.Count(t => t.FechaFinParser != null && t.FechaFinParser > hoy);
+                    tramitesPorVencer = tramites.Count(t => t.FechaFinParser != null && t.FechaFinParser > hoy && t.FechaFinParser <= en30Dias);
+                    tramitesVencidos = tramites.Count(t => t.FechaFinParser != null && t.FechaFinParser <= hoy);
+
                     Console.WriteLine($"CargarDatosBarco: Vigentes={tramitesVigentes}, Por Vencer={tramitesPorVencer}, Vencidos={tramitesVencidos}");
                 }
                 else
                 {
                     Console.WriteLine("CargarDatosBarco: barco.BarcosTramites es NULL");
-
-                    
                 }
 
                 // Cargar usuarios de la empresa/barco
@@ -183,8 +180,8 @@ namespace CRM.V3.Shared.Pages
             {
                 CodigoBarco = barco!.CodigoBarco,
                 CodigoEmpresa = empresa?.CodigoEmpresa,
-                CensoBarco = barco.Censo,
-                FechaCreacion = DateTime.Now,
+                CensoBarco = barco.Censo.Value,
+                FechaCreacion = DateOnly.FromDateTime(DateTime.Now),
                 ListaEmailsEnvioAviso = string.Empty,
                 DiasAvisoTramite = 30
             };
@@ -231,18 +228,18 @@ namespace CRM.V3.Shared.Pages
                 // Asegurarse de que las fechas estén configuradas
                 if (nuevoTramite.FechaInicio == default)
                 {
-                    nuevoTramite.FechaInicio = DateTime.Now;
+                    nuevoTramite.FechaInicio = DateOnly.FromDateTime(DateTime.Now);
                 }
                 if (nuevoTramite.FechaFin == default)
                 {
-                    nuevoTramite.FechaFin = DateTime.Now.AddYears(1);
+                    nuevoTramite.FechaFin = DateOnly.FromDateTime(DateTime.Now.AddYears(1));
                 }
-                if (nuevoTramite.FechaAviso == default && nuevoTramite.FechaFin.HasValue)
+                if (nuevoTramite.FechaAviso == default && nuevoTramite.FechaFin != default)
                 {
-                    nuevoTramite.FechaAviso = nuevoTramite.FechaFin.Value.AddDays(-nuevoTramite.DiasAvisoTramite ?? 30);
+                    nuevoTramite.FechaAviso = nuevoTramite.FechaFin.AddDays(-(nuevoTramite.DiasAvisoTramite));
                 }
 
-                if (tramiteEditando != null && nuevoTramite.Id > 0)
+                if (tramiteEditando != null && nuevoTramite.Id == Guid.Empty)
                 {
                     // Actualizar trámite existente
                     var resultado = await servicioBarcosTramites.UpdateAsync($"api/BarcosTramite/{nuevoTramite.Id}", nuevoTramite);
