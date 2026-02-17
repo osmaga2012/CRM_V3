@@ -61,7 +61,7 @@ namespace CRM.V3.Shared.Services
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error en LoginAsync: {ex.Message}");
+                _logger.LogError(ex, "Error en LoginAsync");
                 var message = "Falla de red. Por favor, intenta nuevamente.";
                 LastErrorMessage = message;
                 return new LoginResultDto { IsSuccess = false, Message = message };
