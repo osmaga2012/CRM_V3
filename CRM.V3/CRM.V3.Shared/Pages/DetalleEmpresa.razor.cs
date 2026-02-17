@@ -212,7 +212,7 @@ namespace CRM.V3.Shared.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al guardar barco: {ex.Message}");
+                _logger.LogError(ex, "Error al guardar barco");
             }
         }
 
@@ -225,7 +225,7 @@ namespace CRM.V3.Shared.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al eliminar barco: {ex.Message}");
+                _logger.LogError(ex, "Error al eliminar barco con CodigoBarco: {CodigoBarco}", codigoBarco);
             }
         }
 
@@ -271,7 +271,7 @@ namespace CRM.V3.Shared.Pages
                 var usuariosExistentes = await servicioUsuarios.GetAllAsync("api/Usuarios", new Dictionary<string, string>(), Array.Empty<string>());
                 if (usuariosExistentes?.Any(u => u.NIFAcceso == nuevoUsuario.NIFAcceso) == true)
                 {
-                    Console.WriteLine("El NIF ya está registrado");
+                    _logger.LogWarning("El NIF {NIF} ya está registrado", nuevoUsuario.NIFAcceso);
                     return;
                 }
 
@@ -299,7 +299,7 @@ namespace CRM.V3.Shared.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al guardar usuario: {ex.Message}");
+                _logger.LogError(ex, "Error al guardar usuario");
             }
         }
 
