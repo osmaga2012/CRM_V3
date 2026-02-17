@@ -168,7 +168,7 @@ namespace CRM.V3.Shared.Services
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error fetching data from {endpoint}: {ex.Message}");
+                _logger.LogError(ex, "Error fetching data from {Endpoint}", endpoint);
                 throw;
             }
 
@@ -198,8 +198,7 @@ namespace CRM.V3.Shared.Services
                 }
             catch (Exception ex)
             {
-
-                Console.WriteLine($"Error: {ex.Message}");
+                _logger.LogError(ex, "Error creating entity at {Endpoint}", endpoint);
                 throw;
             }
 
