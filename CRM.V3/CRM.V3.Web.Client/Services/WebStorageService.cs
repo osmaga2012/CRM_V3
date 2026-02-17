@@ -5,6 +5,7 @@
 using Blazored.LocalStorage;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.JSInterop;
+using Microsoft.Extensions.Logging;
 
 namespace CRM.App.Web.Client.Services
 {
@@ -12,11 +13,13 @@ namespace CRM.App.Web.Client.Services
     {
         private readonly ILocalStorageService _localStorage;
         private readonly IJSRuntime _jsRuntime;
+        private readonly ILogger<WebStorageService> _logger;
 
-        public WebStorageService(ILocalStorageService localStorage, IJSRuntime jsRuntime)
+        public WebStorageService(ILocalStorageService localStorage, IJSRuntime jsRuntime, ILogger<WebStorageService> logger)
         {
             _localStorage = localStorage;
             _jsRuntime = jsRuntime;
+            _logger = logger;
         }
 
         public async Task SaveTokenAsync(string token)

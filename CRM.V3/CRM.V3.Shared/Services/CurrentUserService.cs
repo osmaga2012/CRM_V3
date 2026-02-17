@@ -4,6 +4,7 @@ using CRM.Dtos;
 using System.Security.Claims;
 using System.Net.Http.Json;
 using CRM.V3.Shared.Interfaces;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

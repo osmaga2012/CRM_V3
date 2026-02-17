@@ -1,16 +1,19 @@
 ﻿using CRM.V3.Shared.Interfaces;
 using CRM.V3.Web.Client.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 
 namespace CRM.App.Web.Client.Services
 {
     public class WebNavigationService : IPlatformNavigationService
     {
         private readonly NavigationManager _navigationManager;
+        private readonly ILogger<WebNavigationService> _logger;
 
-        public WebNavigationService(NavigationManager navigationManager)
+        public WebNavigationService(NavigationManager navigationManager, ILogger<WebNavigationService> logger)
         {
             _navigationManager = navigationManager;
+            _logger = logger;
         }
 
         public async Task NavigateTo(string route)
