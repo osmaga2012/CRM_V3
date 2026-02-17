@@ -1,12 +1,12 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
-
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using CRM.V3.Shared.Interfaces;
 using CRM.V3.Shared.Services;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,6 +20,7 @@ namespace CRM.V3.Shared.Providers
         private readonly NavigationManager _navigationManager;
         private readonly HttpClient httpClient;
         private readonly IConfiguration configuration;
+        private readonly ILogger<CustomAuthStateProvider> _logger;
         private readonly AuthenticationState _anonymous;
         private readonly Timer _tokenCheckTimer;
 
@@ -53,12 +54,14 @@ namespace CRM.V3.Shared.Providers
             ISecureStorageService localStorage,
             NavigationManager navigationManager,
             IHttpClientFactory httpClient, // Recibe HttpClient en el constructor
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger<CustomAuthStateProvider> logger)
         {
             _localStorage = localStorage;
             _navigationManager = navigationManager;
             this.httpClient = httpClient.CreateClient("NoAuthClient");
             this.configuration = configuration;
+            _logger = logger;
             _anonymous = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
             // Verificar el token cada 5 minutos
@@ -79,7 +82,7 @@ namespace CRM.V3.Shared.Providers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[AuthStateProvider] Error recuperando el token: {ex.Message}");
+                _logger.LogError(ex, "[AuthStateProvider] Error recuperando el token");
                 return _anonymous;
             }
         }
@@ -143,7 +146,7 @@ namespace CRM.V3.Shared.Providers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CustomAuthStateProvider] Error procesando JWT: {ex.Message}");
+                _logger.LogError(ex, "[CustomAuthStateProvider] Error procesando JWT");
                 //_localStorage.RemoveTokenAsync(); //.RemoveItemAsync("access_token");
                 //return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
                 return _anonymous;
@@ -273,7 +276,7 @@ namespace CRM.V3.Shared.Providers
 
                 if (string.IsNullOrEmpty(userId))
                 {
-                    Console.WriteLine("No se pudo extraer el ID de usuario del JWT.");
+                    _logger.LogWarning("No se pudo extraer el ID de usuario del JWT");
                     NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
                     return;
                 }
@@ -285,7 +288,7 @@ namespace CRM.V3.Shared.Providers
 
                 if (string.IsNullOrEmpty(profileEndpoint))
                 {
-                    Console.WriteLine("El endpoint del perfil no está configurado en appsettings.json (ApiSettings:ProfileEndpoint).");
+                    _logger.LogWarning("El endpoint del perfil no está configurado en appsettings.json (ApiSettings:ProfileEndpoint)");
                     NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
                     return;
                 }
@@ -325,19 +328,15 @@ namespace CRM.V3.Shared.Providers
                 }
                 else
                 {
-                    Console.WriteLine("Falló la obtención del perfil de usuario desde la API.");
+                    _logger.LogWarning("Falló la obtención del perfil de usuario desde la API");
                     NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
                 }
             }
             catch (HttpRequestException httpEx)
             {
                 // Error de red o error de HTTP del servidor (404, 500, etc.)
-                Console.WriteLine($"Error HTTP al obtener el perfil: {httpEx.Message}");
+                _logger.LogError(httpEx, "Error HTTP al obtener el perfil. Código de estado: {StatusCode}", httpEx.StatusCode);
                 // Puedes acceder a httpEx.StatusCode si es un error HTTP
-                if (httpEx.StatusCode.HasValue)
-                {
-                    Console.WriteLine($"Código de estado HTTP: {httpEx.StatusCode}");
-                }
                 // Si el servidor devuelve un cuerpo de error, podrías intentar leerlo
                 // var errorContent = await httpEx.Content.ReadAsStringAsync();
                 // Console.WriteLine($"Contenido del error: {errorContent}");
@@ -345,11 +344,11 @@ namespace CRM.V3.Shared.Providers
             catch (JsonException jsonEx)
             {
                 // Error al deserializar la respuesta JSON
-                Console.WriteLine($"Error de JSON al obtener el perfil: {jsonEx.Message}");
+                _logger.LogError(jsonEx, "Error de JSON al obtener el perfil");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en NotifyUserAuthentication: {ex.Message}");
+                _logger.LogError(ex, "Error en NotifyUserAuthentication");
                 NotifyAuthenticationStateChanged(Task.FromResult(_anonymous)); // Manejar el error adecuadamente
             }
 
