@@ -1,4 +1,4 @@
-using CRM.Dtos;
+﻿using CRM.Dtos;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components;
 
@@ -67,7 +67,7 @@ namespace CRM.V3.Shared.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al cargar datos: {ex.Message}");
+                _logger.LogError(ex, "Error al cargar datos del usuario");
                 errorMessage = $"Error al cargar datos: {ex.Message}";
                 isLoading = false;
             }
@@ -167,7 +167,7 @@ namespace CRM.V3.Shared.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al guardar usuario: {ex.Message}");
+                _logger.LogError(ex, "Error al guardar usuario");
                 errorMessage = $"Error al guardar: {ex.Message}";
             }
             finally
