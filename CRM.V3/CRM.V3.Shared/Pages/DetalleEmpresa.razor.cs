@@ -135,7 +135,7 @@ namespace CRM.V3.Shared.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al cargar datos de la empresa: {ex.Message}");
+                _logger.LogError(ex, "Error al cargar datos de la empresa");
                 isLoading = false;
                 StateHasChanged();
             }
