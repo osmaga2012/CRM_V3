@@ -1,4 +1,4 @@
-using CRM.Dtos;
+﻿using CRM.Dtos;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components;
 
@@ -48,7 +48,7 @@ namespace CRM.V3.Shared.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al cargar usuarios: {ex.Message}");
+                _logger.LogError(ex, "Error al cargar usuarios");
                 isLoading = false;
             }
         }
@@ -117,7 +117,7 @@ namespace CRM.V3.Shared.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al eliminar usuario: {ex.Message}");
+                _logger.LogError(ex, "Error al eliminar usuario con ID: {UsuarioId}", usuarioId);
             }
         }
 
