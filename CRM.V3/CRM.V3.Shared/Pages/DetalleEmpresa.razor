@@ -71,7 +71,7 @@ else
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="material-symbols-outlined text-primary">badge</span>
-                                    <span>@empresa.CifNif</span>
+                                    <span>@empresa.NIFE</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="material-symbols-outlined text-primary">directions_boat</span>
@@ -198,11 +198,11 @@ else
                                                             <span class="material-symbols-outlined text-xs">badge</span>
                                                             <span>@barco.CodigoBarco</span>
                                                         </div>
-                                                         @if (barco.CodigoBarco != 0)
+                                                         @if (barco.CodigoBarco != "")
                                                         {
                                                             <div class="flex items-center gap-1">
                                                                 <span class="material-symbols-outlined text-xs">anchor</span>
-                                                                <span>@barco.Puerto</span>
+                                                                <span>@barco.Apodo</span>
                                                             </div>
                                                         }
                                                     </div>
