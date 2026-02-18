@@ -172,10 +172,10 @@ else
                             @foreach (var barco in barcosEmpresa)
                             {
                                 var tramitesBarco = barco.BarcosTramites?.Count ?? 0;
-                                var hoy = DateTime.Now;
-                                var tramitesVigentesBarco = barco.BarcosTramites?.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy) ?? 0;
-                                var tramitesPorVencerBarco = barco.BarcosTramites?.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy && t.FechaFin.Value <= hoy.AddDays(30)) ?? 0;
-                                var tramitesVencidosBarco = barco.BarcosTramites?.Count(t => t.FechaFin.HasValue && t.FechaFin.Value <= hoy) ?? 0;
+                                var hoy = DateOnly.FromDateTime(DateTime.Now);
+                                var tramitesVigentesBarco = barco.BarcosTramites?.Count(t => t.FechaFin != default && t.FechaFin > hoy) ?? 0;
+                                var tramitesPorVencerBarco = barco.BarcosTramites?.Count(t => t.FechaFin != default && t.FechaFin > hoy && t.FechaFin <= hoy.AddDays(30)) ?? 0;
+                                var tramitesVencidosBarco = barco.BarcosTramites?.Count(t => t.FechaFin != default && t.FechaFin <= hoy) ?? 0;
                                 
                                 <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:shadow-xl transition-all cursor-pointer group" @onclick="() => NavegarADetalleBarco(barco.CodigoBarco)">
                                     <div class="flex items-start gap-4">
@@ -198,7 +198,7 @@ else
                                                             <span class="material-symbols-outlined text-xs">badge</span>
                                                             <span>@barco.CodigoBarco</span>
                                                         </div>
-                                                         @if (barco.CodigoBarco != "")
+                                                         @if (!string.IsNullOrEmpty(barco.Apodo))
                                                         {
                                                             <div class="flex items-center gap-1">
                                                                 <span class="material-symbols-outlined text-xs">anchor</span>
@@ -213,6 +213,13 @@ else
                                                             <span>Capitán: @barco.CapitanNombre</span>
                                                         </div>
                                                     }
+                                                       @if (!string.IsNullOrEmpty(barco.PtoD))
+                                                       {
+                                                           <div class="flex items-center gap-1 mt-2 text-xs text-slate-400">
+                                                               <span class="material-symbols-outlined text-xs">anchor</span>
+                                                               <span>Puerto: @barco.PtoD</span>
+                                                           </div>
+                                                       }
                                                 </div>
                                                 
                                                 <div class="flex gap-1">
@@ -329,7 +336,7 @@ else
                                             
                                             <div class="flex items-center gap-1 mt-2 text-xs text-slate-400">
                                                 <span class="material-symbols-outlined text-xs">calendar_today</span>
-                                                <span>Registrado: @usuario.FechaRegistro?.ToShortDateString()</span>
+                                                <span>Registrado: @usuario.FechaRegistro.ToShortDateString()</span>
                                             </div>
                                         </div>
                                     </div>
@@ -386,9 +393,9 @@ else
                                     Código Barco *
                                 </label>
                                 <input @bind="nuevoBarco.CodigoBarco" 
-                                       type="number" 
+                                       type="text" 
                                        class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                       placeholder="Código único (número)" />
+                                       placeholder="Código único" />
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
@@ -416,7 +423,7 @@ else
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
                                     Puerto
                                 </label>
-                                <input @bind="nuevoBarco.Puerto" 
+                                <input @bind="nuevoBarco.PtoD" 
                                        type="text" 
                                        class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                        placeholder="Puerto de amarre" />
@@ -452,7 +459,7 @@ else
                             Cancelar
                         </button>
                         <button @onclick="GuardarBarco" 
-                                disabled="@(string.IsNullOrWhiteSpace(nuevoBarco.NombreB) || nuevoBarco.CodigoBarco == 0)"
+                                disabled="@(string.IsNullOrWhiteSpace(nuevoBarco.NombreB) || string.IsNullOrWhiteSpace(nuevoBarco.CodigoBarco))"
                                 class="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl hover:from-primary/90 hover:to-blue-600/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg">
                             @(barcoEditando != null ? "Actualizar Barco" : "Crear Barco")
                         </button>

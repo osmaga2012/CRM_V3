@@ -138,9 +138,9 @@ namespace CRM.V3.Shared.Pages
                     var hoy = DateOnly.FromDateTime(DateTime.Now);
                     var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
 
-                    tramitesVigentes = tramites.Count(t => t.FechaFinParser != null && t.FechaFinParser > hoy);
-                    tramitesPorVencer = tramites.Count(t => t.FechaFinParser != null && t.FechaFinParser > hoy && t.FechaFinParser <= en30Dias);
-                    tramitesVencidos = tramites.Count(t => t.FechaFinParser != null && t.FechaFinParser <= hoy);
+                    tramitesVigentes = tramites.Count(t => t.FechaFinParser != null && DateOnly.FromDateTime(t.FechaFinParser.Value) > hoy);
+                    tramitesPorVencer = tramites.Count(t => t.FechaFinParser != null && DateOnly.FromDateTime(t.FechaFinParser.Value) > hoy && DateOnly.FromDateTime(t.FechaFinParser.Value) <= en30Dias);
+                    tramitesVencidos = tramites.Count(t => t.FechaFinParser != null && DateOnly.FromDateTime(t.FechaFinParser.Value) <= hoy);
 
                     Console.WriteLine($"CargarDatosBarco: Vigentes={tramitesVigentes}, Por Vencer={tramitesPorVencer}, Vencidos={tramitesVencidos}");
                 }
@@ -180,8 +180,9 @@ namespace CRM.V3.Shared.Pages
             {
                 CodigoBarco = barco!.CodigoBarco,
                 CodigoEmpresa = empresa?.CodigoEmpresa,
-                CensoBarco = barco.Censo ?? string.Empty,
-                FechaCreacion = DateTime.Now, // <-- Cambio aquí
+                // Corregido: Convertir el valor nullable int? a string solo si tiene valor, si no, usar string.Empty
+                CensoBarco = barco.Censo ?? 0,
+                FechaCreacion = DateOnly.FromDateTime(DateTime.Now), // <-- Cambio aquí
                 ListaEmailsEnvioAviso = string.Empty,
                 DiasAvisoTramite = 30
             };

@@ -1,16 +1,20 @@
 ﻿using CRM.Dtos;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 
 namespace CRM.V3.Shared.Pages
 {
     public partial class DetalleEmpresa : ComponentBase
     {
+        [Inject]
+        private ILogger<DetalleEmpresa> _logger { get; set; } = null!;
+
         [Parameter]
         public string CodigoEmpresa { get; set; } = string.Empty;
 
         [Parameter]
-        public string CodigoBarco { get; set; } = string.Empty;
+        public string? CodigoBarco { get; set; }
 
         // Estado de carga
         private bool isLoading = true;
@@ -72,46 +76,43 @@ namespace CRM.V3.Shared.Pages
                 }
 
                 // Si hay un Código de Barco en la URL, cargar los datos de ese barco en particular
-                if (!string.IsNullOrEmpty(CodigoBarco) && long.TryParse(CodigoBarco, out long codigoBarcoLong))
+                if (!string.IsNullOrEmpty(CodigoBarco))
                 {
                     // Cargar barco por CodigoBarco
-                    var barcoResult = await servicioBarcos.GetByIdAsync("api/Barcos", codigoBarcoLong);
+                    Dictionary<string, string> filtrosBarco = new Dictionary<string, string>
+                    {
+                        { "CodigoBarco", CodigoBarco }
+                    };
+                    string[] includesBarco = new string[] { "BarcosTramites" };
+                    var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", filtrosBarco, includesBarco);
+                    var barcoResult = barcosResult?.FirstOrDefault();
+                    
                     if (barcoResult != null)
                     {
                         barcoResult.BarcosTramites = barcoResult.BarcosTramites?.OrderByDescending(t => t.FechaInicio).ToList();
 
                         // Asignar el barco encontrado a la lista de barcos de la empresa (para mostrar detalles)
                         barcosEmpresa = new List<BarcosDto> { barcoResult };
-                        empresa.CodigoBarco = barcoResult.CodigoBarco;
                     }
                 }
                 else
                 {
-                    // Cargar todos los barcos con sus trámites y filtrar por CodigoBarco de la empresa
-                    // Nota: El modelo actual es 1:1 (Empresa → Barco), pero mostramos como lista
+                    // Cargar todos los barcos con sus trámites y filtrar por CodigoEmpresa
                     string[] includesBarcos = new string[] { "BarcosTramites" };
                     
-                    // Si la empresa tiene un CodigoBarco, buscar ese barco específico
-                    if (empresa.CodigoBarco > 0)
+                    Dictionary<string, string> filtrosBarcos = new Dictionary<string, string>
                     {
-                        var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", null, includesBarcos);
-                        
-                        // Filtrar en el cliente por CodigoBarco de la empresa
-                        barcosEmpresa = barcosResult?
-                            .Where(b => b.CodigoBarco == empresa.CodigoBarco)
-                            .ToList() ?? new List<BarcosDto>();
-                    }
-                    else
-                    {
-                        barcosEmpresa = new List<BarcosDto>();
-                    }
+                        { "CodigoEmpresa", CodigoEmpresa }
+                    };
+                    var barcosResult = await servicioBarcos.GetAllAsync("api/Barcos", filtrosBarcos, includesBarcos);
+                    barcosEmpresa = barcosResult?.ToList() ?? new List<BarcosDto>();
                 }
                 
                 totalBarcos = barcosEmpresa.Count;
 
                 // Calcular estadísticas de trámites de todos los barcos
-                var hoy = DateTime.Now;
-                var en30Dias = DateTime.Now.AddDays(30);
+                var hoy = DateOnly.FromDateTime(DateTime.Now);
+                var en30Dias = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
 
                 totalTramites = barcosEmpresa.Sum(b => b.BarcosTramites?.Count ?? 0);
                 
@@ -119,9 +120,9 @@ namespace CRM.V3.Shared.Pages
                     .SelectMany(b => b.BarcosTramites ?? new List<BarcosTramitesDto>())
                     .ToList();
 
-                tramitesVigentes = todosTramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy);
-                tramitesPorVencer = todosTramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value > hoy && t.FechaFin.Value <= en30Dias);
-                tramitesVencidos = todosTramites.Count(t => t.FechaFin.HasValue && t.FechaFin.Value <= hoy);
+                tramitesVigentes = todosTramites.Count(t => t.FechaFin != default && t.FechaFin > hoy);
+                tramitesPorVencer = todosTramites.Count(t => t.FechaFin != default && t.FechaFin > hoy && t.FechaFin <= en30Dias);
+                tramitesVencidos = todosTramites.Count(t => t.FechaFin != default && t.FechaFin <= hoy);
 
                 // Cargar usuarios de la empresa
                 var usuariosResult = await servicioUsuarios.GetAllAsync("api/Usuarios", new Dictionary<string, string>(), Array.Empty<string>());
@@ -148,9 +149,8 @@ namespace CRM.V3.Shared.Pages
             barcoEditando = null;
             nuevoBarco = new BarcosDto
             {
-                Censo = string.Empty,
-                FechaAlta = DateTime.Now,
-                Activo = true
+                CodigoEmpresa = empresa?.CodigoEmpresa,
+                FechaAlta = DateOnly.FromDateTime(DateTime.Now)
             };
             mostrarFormBarco = true;
         }
@@ -165,9 +165,9 @@ namespace CRM.V3.Shared.Pages
                 Matricula = barco.Matricula,
                 Censo = barco.Censo,
                 CapitanNombre = barco.CapitanNombre,
-                Puerto = barco.Puerto,
+                PtoD = barco.PtoD,
                 FechaAlta = barco.FechaAlta,
-                Activo = barco.Activo
+                CodigoEmpresa = barco.CodigoEmpresa
             };
             mostrarFormBarco = true;
         }
@@ -182,7 +182,7 @@ namespace CRM.V3.Shared.Pages
         private async Task GuardarBarco()
         {
             if (string.IsNullOrWhiteSpace(nuevoBarco.NombreB) || 
-                nuevoBarco.CodigoBarco == 0)
+                string.IsNullOrWhiteSpace(nuevoBarco.CodigoBarco))
             {
                 return;
             }
@@ -216,8 +216,11 @@ namespace CRM.V3.Shared.Pages
             }
         }
 
-        private async Task EliminarBarco(long codigoBarco)
+        private async Task EliminarBarco(string? codigoBarco)
         {
+            if (string.IsNullOrWhiteSpace(codigoBarco))
+                return;
+
             try
             {
                 await servicioBarcos.DeleteAsync($"api/Barcos/", codigoBarco);
@@ -229,8 +232,11 @@ namespace CRM.V3.Shared.Pages
             }
         }
 
-        private void NavegarADetalleBarco(long codigoBarco)
+        private void NavegarADetalleBarco(string? codigoBarco)
         {
+            if (string.IsNullOrWhiteSpace(codigoBarco))
+                return;
+
             NavigationManager.NavigateTo($"/barco/empresa/{CodigoEmpresa}/tramites/{codigoBarco}");
         }
 
