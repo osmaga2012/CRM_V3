@@ -15,6 +15,7 @@
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
     <PackageReference Include="BlazorPro.BlazorSize" Version="9.0.0" />
+    <PackageReference Include="CRM.Dtos" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.3.9" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.3" />
@@ -23,9 +24,6 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\CRM.Dtos\CRM.Dtos.csproj" />
-  </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Helpers\Traducciones\" />
