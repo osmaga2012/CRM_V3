@@ -229,22 +229,22 @@ namespace CRM.V3.Shared.Pages
                 // Asegurarse de que las fechas estén configuradas
                 if (nuevoTramite.FechaInicio == default)
                 {
-                    nuevoTramite.FechaInicio = DateTime.Now;
+                    nuevoTramite.FechaInicio = DateOnly.FromDateTime(DateTime.Now);
                 }
                 if (nuevoTramite.FechaFin == default)
                 {
-                    nuevoTramite.FechaFin = DateTime.Now.AddYears(1);
+                    nuevoTramite.FechaFin = DateOnly.FromDateTime( DateTime.Now.AddYears(1));
                 }
                 if (nuevoTramite.FechaAviso == default && nuevoTramite.FechaFin != default)
                 {
-                    if (nuevoTramite.FechaFin.HasValue && nuevoTramite.DiasAvisoTramite.HasValue)
+                    if (nuevoTramite.FechaFin != default && nuevoTramite.DiasAvisoTramite!=default)
                     {
-                        nuevoTramite.FechaAviso = nuevoTramite.FechaFin.Value.AddDays(-(nuevoTramite.DiasAvisoTramite.Value));
+                        nuevoTramite.FechaAviso = nuevoTramite.FechaFin.AddDays(-(nuevoTramite.DiasAvisoTramite));
                     }
                 }
 
                 // Corregido: comparar con 0 en vez de Guid.Empty
-                if (tramiteEditando != null && nuevoTramite.Id != 0)
+                if (tramiteEditando != null && nuevoTramite.Id != Guid.Empty)
                 {
                     // Actualizar trámite existente
                     var resultado = await servicioBarcosTramites.UpdateAsync($"api/BarcosTramite/{nuevoTramite.Id}", nuevoTramite);
@@ -271,7 +271,7 @@ namespace CRM.V3.Shared.Pages
             }
         }
 
-        private async Task EliminarTramite(long tramiteId)
+        private async Task EliminarTramite(Guid tramiteId)
         {
             try
             {
@@ -389,7 +389,7 @@ namespace CRM.V3.Shared.Pages
             }
         }
 
-        private async Task EliminarUsuario(long usuarioId)
+        private async Task EliminarUsuario(Guid usuarioId)
         {
             try
             {

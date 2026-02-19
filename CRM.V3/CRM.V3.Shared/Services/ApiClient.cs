@@ -1,6 +1,7 @@
 ﻿using CRM.Dtos.Response;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -103,6 +104,7 @@ namespace CRM.V3.Shared.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly ILogger<ApiClient<TDto>> _logger;
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true,
@@ -115,12 +117,11 @@ namespace CRM.V3.Shared.Services
             }
         };
 
-        public ApiClient(HttpClient httpClient,IHttpClientFactory httpClientFactory)
+        public ApiClient(HttpClient httpClient, IHttpClientFactory httpClientFactory, ILogger<ApiClient<TDto>> logger)
         {
             this.httpClientFactory = httpClientFactory;
-            //_httpClient = httpClientFactory.CreateClient("ApiCRM");
             _httpClient = httpClientFactory.CreateClient("ApiClient");
-
+            _logger = logger;
         }
 
         public async Task<IEnumerable<TDto>> GetAllAsync(string endpoint,

@@ -177,7 +177,8 @@ else
                                 var tramitesPorVencerBarco = barco.BarcosTramites?.Count(t => t.FechaFin != default && t.FechaFin > hoy && t.FechaFin <= hoy.AddDays(30)) ?? 0;
                                 var tramitesVencidosBarco = barco.BarcosTramites?.Count(t => t.FechaFin != default && t.FechaFin <= hoy) ?? 0;
                                 
-                                <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:shadow-xl transition-all cursor-pointer group" @onclick="() => NavegarADetalleBarco(barco.CodigoBarco)">
+                                <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 hover:shadow-xl transition-all cursor-pointer group"
+                                    @onclick="() => NavegarADetalleBarco(barco.CodigoBarco.ToString())">
                                     <div class="flex items-start gap-4">
                                         <div class="bg-gradient-to-br from-sky-500 to-blue-600 text-white shrink-0 w-16 h-16 flex items-center justify-center rounded-xl font-bold text-xl shadow-lg">
                                             <span class="material-symbols-outlined text-3xl">directions_boat</span>
@@ -228,7 +229,7 @@ else
                                                             title="Editar barco">
                                                         <span class="material-symbols-outlined text-base">edit</span>
                                                     </button>
-                                                    <button @onclick="() => EliminarBarco(barco.CodigoBarco)" @onclick:stopPropagation
+                                                    <button @onclick="() => EliminarBarco(barco.CodigoBarco.ToString())" @onclick:stopPropagation
                                                             class="w-8 h-8 rounded-lg flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-all border border-red-200"
                                                             title="Eliminar barco">
                                                         <span class="material-symbols-outlined text-base">delete</span>
@@ -236,6 +237,7 @@ else
                                                 </div>
                                             </div>
                                             
+
                                             <!-- Estadísticas de trámites del barco -->
                                             <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                                                 <div class="grid grid-cols-4 gap-2 text-center">
@@ -459,7 +461,7 @@ else
                             Cancelar
                         </button>
                         <button @onclick="GuardarBarco" 
-                                disabled="@(string.IsNullOrWhiteSpace(nuevoBarco.NombreB) || string.IsNullOrWhiteSpace(nuevoBarco.CodigoBarco))"
+                                disabled="@(string.IsNullOrWhiteSpace(nuevoBarco.NombreB) || string.IsNullOrWhiteSpace(nuevoBarco.CodigoBarco.ToString()))"
                                 class="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white font-bold rounded-xl hover:from-primary/90 hover:to-blue-600/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg">
                             @(barcoEditando != null ? "Actualizar Barco" : "Crear Barco")
                         </button>

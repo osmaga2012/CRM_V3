@@ -1,4 +1,4 @@
-@page "/usuario/{UsuarioId:long}"
+﻿@page "/usuario/{UsuarioId:long}"
 @page "/usuario/nuevo"
 @inject NavigationManager NavigationManager
 @using CRM.Dtos
@@ -206,27 +206,27 @@ else
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-600 mb-1">CIF/NIF</label>
-                                    <p class="text-slate-900 font-medium">@usuario.Empresa.CifNif</p>
+                                    <p class="text-slate-900 font-medium">@usuario.Empresa.NIFE</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-600 mb-1">Teléfono</label>
-                                    <p class="text-slate-900 font-medium">@usuario.Empresa.Telefono</p>
+                                    <p class="text-slate-900 font-medium">@usuario.Empresa.TelefonoE</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-600 mb-1">Email</label>
-                                    <p class="text-slate-900 font-medium">@usuario.Empresa.Email</p>
+                                    <p class="text-slate-900 font-medium">@usuario.Empresa.EMail1</p>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-semibold text-slate-600 mb-1">Dirección</label>
                                     <p class="text-slate-900 font-medium">
-                                        @usuario.Empresa.Direccion
-                                        @if (!string.IsNullOrEmpty(usuario.Empresa.CodigoPostal) || !string.IsNullOrEmpty(usuario.Empresa.Localidad))
+                                        @usuario.Empresa.Domicilio
+                                        @if (!string.IsNullOrEmpty(usuario.Empresa.CodigoPostalE) || !string.IsNullOrEmpty(usuario.Empresa.PoblacionE))
                                         {
-                                            <span>, @usuario.Empresa.CodigoPostal @usuario.Empresa.Localidad</span>
+                                            <span>, @usuario.Empresa.CodigoPostalE @usuario.Empresa.CodigoLocalidadE</span>
                                         }
-                                        @if (!string.IsNullOrEmpty(usuario.Empresa.Provincia))
+                                        @if (!string.IsNullOrEmpty(usuario.Empresa.ProvinciaE))
                                         {
-                                            <span>, @usuario.Empresa.Provincia</span>
+                                            <span>, @usuario.Empresa.ProvinciaE</span>
                                         }
                                     </p>
                                 </div>
@@ -255,11 +255,11 @@ else
                                         </div>
                                         <div>
                                             <label class="block text-sm font-semibold text-slate-600 mb-1">Tipo de Barco</label>
-                                            <p class="text-slate-900 font-medium">@usuario.Empresa.Barco.TipoBarco</p>
+                                            <p class="text-slate-900 font-medium">@usuario.Empresa.Barco.codTipoBarco</p>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-semibold text-slate-600 mb-1">Puerto</label>
-                                            <p class="text-slate-900 font-medium">@usuario.Empresa.Barco.Puerto</p>
+                                            <p class="text-slate-900 font-medium">-</p>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-semibold text-slate-600 mb-1">Capitán</label>
@@ -298,7 +298,7 @@ else
                                                     <td class="p-2">@barco.NombreB</td>
                                                     <td class="p-2">@barco.Censo</td>
                                                     <td class="p-2">@barco.Matricula</td>
-                                                    <td class="p-2">@barco.Puerto</td>
+                                                    <td class="p-2">-</td>
                                                 </tr>
                                             }
                                         </tbody>

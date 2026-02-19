@@ -5,6 +5,7 @@ using CRM.V3.Shared.Interfaces;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using CRM.V3.Shared.Providers;
+using Microsoft.Extensions.Logging; // Agrega este using
 
 namespace CRM.V3.Shared.Services
 {
@@ -14,6 +15,7 @@ namespace CRM.V3.Shared.Services
         private readonly ISecureStorageService secureStorage;
         private readonly AuthenticationStateProvider _authStateProvider;
         private readonly HttpClient _httpClient;
+        private readonly ILogger<AuthService> _logger; // Agrega este campo
 
         public event Action OnLoginSuccess;
 
@@ -23,12 +25,14 @@ namespace CRM.V3.Shared.Services
             //ILocalStorageService localStorage,
             ISecureStorageService secureStorage,
             IHttpClientFactory httpClientFactory,
-            AuthenticationStateProvider authStateProvider)
+            AuthenticationStateProvider authStateProvider,
+            ILogger<AuthService> logger) // Agrega este parámetro
         {
             //_localStorage = localStorage;
             this.secureStorage = secureStorage;
             _authStateProvider = authStateProvider;
             _httpClient = httpClientFactory.CreateClient("NoAuthClient");
+            _logger = logger; // Asigna el logger
         }
 
 

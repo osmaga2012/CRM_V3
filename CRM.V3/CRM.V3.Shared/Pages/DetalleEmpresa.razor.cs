@@ -182,7 +182,7 @@ namespace CRM.V3.Shared.Pages
         private async Task GuardarBarco()
         {
             if (string.IsNullOrWhiteSpace(nuevoBarco.NombreB) || 
-                string.IsNullOrWhiteSpace(nuevoBarco.CodigoBarco))
+                string.IsNullOrWhiteSpace(nuevoBarco.CodigoBarco.ToString()))
             {
                 return;
             }

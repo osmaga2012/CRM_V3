@@ -1,6 +1,7 @@
 ﻿using CRM.Dtos;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging; // Agrega este using
 
 namespace CRM.V3.Shared.Pages
 {
@@ -17,6 +18,9 @@ namespace CRM.V3.Shared.Pages
         private UsuarioDto usuario = new();
         private List<EmpresasDto> empresas = new();
         private List<BarcosDto> barcos = new();
+
+        [Inject]
+        private ILogger<DetalleUsuario> _logger { get; set; }
 
         protected override async Task OnInitializedAsync()
         {

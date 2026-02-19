@@ -1,6 +1,7 @@
 ﻿using CRM.Dtos;
 using CRM.V3.Shared.Interfaces;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging; // Añadir este using
 
 namespace CRM.V3.Shared.Pages
 {
@@ -20,6 +21,9 @@ namespace CRM.V3.Shared.Pages
         private string searchTerm = string.Empty;
         private string filtroEstado = string.Empty;
         private string filtroRol = string.Empty;
+
+        [Inject]
+        private ILogger<ListaUsuarios> _logger { get; set; } = default!; // Inyectar el logger
 
         protected override async Task OnInitializedAsync()
         {
@@ -99,12 +103,12 @@ namespace CRM.V3.Shared.Pages
             NavigationManager.NavigateTo("/usuario/nuevo");
         }
 
-        private void VerDetalleUsuario(long usuarioId)
+        private void VerDetalleUsuario(Guid usuarioId)
         {
             NavigationManager.NavigateTo($"/usuario/{usuarioId}");
         }
 
-        private async Task EliminarUsuario(long usuarioId)
+        private async Task EliminarUsuario(Guid usuarioId)
         {
             try
             {

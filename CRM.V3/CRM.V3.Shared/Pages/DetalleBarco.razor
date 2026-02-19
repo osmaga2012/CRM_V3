@@ -180,7 +180,24 @@ else
                                 @foreach (var tramite in tramites.OrderByDescending(t => t.FechaFin))
                                 {
                                     var hoy = DateTime.Now;
-                                    var diasRestantes = tramite.FechaFin.HasValue ? (tramite.FechaFin.Value - hoy).Days : 0;
+
+                                    // Conversión de DateTime a DateOnly para la comparación
+                                    DateOnly fechaFin;
+                                    if (tramite.FechaFin is DateOnly df)
+                                    {
+                                        fechaFin = df;
+                                    }
+                                    else if (tramite.FechaFin !=  null)
+                                    {
+                                        fechaFin = DateOnly.FromDateTime(Convert.ToDateTime(tramite.FechaFin));
+                                    }
+                                    else
+                                    {
+                                        fechaFin = DateOnly.FromDateTime(hoy);
+                                    }
+                                    var hoyDateOnly = DateOnly.FromDateTime(hoy);
+
+                                    var diasRestantes = tramite.FechaFin != default ? (fechaFin.DayNumber - hoyDateOnly.DayNumber) : 0;
                                     var estadoTexto = diasRestantes < 0 ? "Vencido" : (diasRestantes <= 30 ? "Por Vencer" : "Vigente");
                                     var borderClass = diasRestantes < 0 ? "border-red-500" : (diasRestantes <= 30 ? "border-amber-500" : "border-sky-500");
                                     var bgClass = diasRestantes < 0 ? "bg-red-100" : (diasRestantes <= 30 ? "bg-amber-100" : "bg-sky-100");
@@ -198,11 +215,11 @@ else
                                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                                                             <div class="flex items-center gap-2 text-slate-600">
                                                                 <span class="material-symbols-outlined text-base">event</span>
-                                                                <span>Inicio: <strong>@tramite.FechaInicio?.ToString("dd/MM/yyyy")</strong></span>
+                                                                <span>Inicio: <strong>@(tramite.FechaInicio != null ? ((DateOnly)tramite.FechaInicio).ToString("dd/MM/yyyy") : "")</strong></span>
                                                             </div>
                                                             <div class="flex items-center gap-2 text-slate-600">
                                                                 <span class="material-symbols-outlined text-base">event_available</span>
-                                                                <span>Fin: <strong>@tramite.FechaFin?.ToString("dd/MM/yyyy")</strong></span>
+                                                                <span>Fin: <strong>@(tramite.FechaFin != null ? ((DateOnly)tramite.FechaFin).ToString("dd/MM/yyyy") : "")</strong></span>
                                                             </div>
                                                             <div class="flex items-center gap-2 @textClass">
                                                                 <span class="material-symbols-outlined text-base">schedule</span>
@@ -320,7 +337,7 @@ else
                                                     }
                                                     <div class="flex items-center gap-2 text-xs text-slate-500">
                                                         <span class="material-symbols-outlined text-base">calendar_today</span>
-                                                        <span>Registro: @usuario.FechaRegistro?.ToString("dd/MM/yyyy")</span>
+                                                        <span>Registro: @(usuario.FechaRegistro != null ? usuario.FechaRegistro.ToString("dd/MM/yyyy") : "")</span>
                                                     </div>
                                                 </div>
                                             </div>
