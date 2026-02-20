@@ -31,7 +31,7 @@ jobs:
             --username osmaga2012 \
             --password ${{ secrets.API_TOKEN_GITHUB }} \
             --store-password-in-clear-text \
-            --configfile CRM_V3.Shared/nuget.config
+            --configfile CRM.V3/CRM_V3.Shared/nuget.config
       #- name: Configurar autenticación NuGet para GitHub Packages
       #  run: |
       #    dotnet nuget add source "https://nuget.pkg.github.com/osmaga2012/index.json" \
