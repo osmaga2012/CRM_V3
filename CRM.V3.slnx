@@ -2,9 +2,6 @@
   <Folder Name="/Elementos de la solución/">
     <File Path=".editorconfig" />
   </Folder>
-  <Folder Name="/Submodulos/">
-    <Project Path="CRM_REPO/CRM.Dtos/CRM.Dtos.csproj" />
-  </Folder>
   <Project Path="CRM.V3/CRM.V3.Shared/CRM.V3.Shared.csproj" />
   <Project Path="CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj" />
   <Project Path="CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj" />
