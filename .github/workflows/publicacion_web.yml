@@ -69,9 +69,8 @@ jobs:
       #- name: Restore dependencies
       #  run: dotnet restore CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj
       - name: Restaurar dependencias
-        run: # Usamos la variable $CONFIG_PATH para que sepa dónde están las credenciales
-          dotnet restore CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj \
-            --configfile ${{ env.CONFIG_PATH }}
+        run: dotnet restore "CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj" --configfile "${{ env.CONFIG_PATH }}"
+          
             
       - name: Publish App
         run: |
