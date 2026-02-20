@@ -36,7 +36,7 @@ jobs:
           
           dotnet nuget update source github \
             --username osmaga2012 \
-            --password ${{ secrets.API_TOKEN_GITHUB }} \
+            --password ${{ secrets['Token package'] }} \
             --store-password-in-clear-text \
             --configfile "$CONF"
       #- name: Configurar autenticación NuGet para GitHub Packages
