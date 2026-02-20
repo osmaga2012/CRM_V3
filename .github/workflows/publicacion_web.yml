@@ -27,11 +27,15 @@ jobs:
           token: ${{ secrets.API_TOKEN_GITHUB }}
       - name: Configurar autenticación NuGet para GitHub Packages
         run: |
+          # Buscamos el archivo nuget.config y guardamos su ruta en una variable
+          CONFIG_PATH=$(find . -name "nuget.config" | head -n 1)
+          echo "Usando config en: $CONFIG_PATH"
+          
           dotnet nuget update source github \
             --username osmaga2012 \
             --password ${{ secrets.API_TOKEN_GITHUB }} \
             --store-password-in-clear-text \
-            --configfile CRM.V3/CRM_V3.Shared/nuget.config
+            --configfile "$CONFIG_PATH"
       #- name: Configurar autenticación NuGet para GitHub Packages
       #  run: |
       #    dotnet nuget add source "https://nuget.pkg.github.com/osmaga2012/index.json" \
