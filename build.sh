@@ -46,7 +46,22 @@ EOF
     echo "NuGet config updated."
 fi
 
-# 4. Restaurar y Publicar
+# 4. Instalación de Workloads (Necesario para WASM)
+echo "Installing WASM Workloads..."
+# Instalamos específicamente wasm-tools para evitar que el restore falle por falta de herramientas
+"$INSTALL_DIR/dotnet" workload install wasm-tools --no-cache
+
+# 5. Restaurar y Publicar
+PROJECT_PATH="CRM.V3/CRM.V3.Web.Client/CRM.V3.Web.Client.csproj"
+
+echo "Restoring NuGet packages..."
+"$INSTALL_DIR/dotnet" restore "$PROJECT_PATH" --configfile "$CONFIG_PATH"
+
+echo "Publishing Blazor WebAssembly..."
+"$INSTALL_DIR/dotnet" publish "$PROJECT_PATH" -c Release -o publish /p:BlazorEnableCompression=false --no-restore
+
+
+# 5. Restaurar y Publicar
 # IMPORTANTE: Verifica si es CRM.V3.Web o CRM.V3.Web.Client
 PROJECT_PATH="CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj"
 
@@ -56,7 +71,7 @@ echo "Restoring NuGet packages..."
 echo "Publishing Blazor WebAssembly..."
 "$INSTALL_DIR/dotnet" publish "$PROJECT_PATH" -c Release -o publish /p:BlazorEnableCompression=false
 
-# 5. Post-procesamiento
+# 6. Post-procesamiento
 if [ -f "_redirects" ]; then
     cp _redirects publish/wwwroot/_redirects
 fi
