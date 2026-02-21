@@ -38,7 +38,7 @@ jobs:
           # 3. Añadir las credenciales limpias usando el secreto correcto
           dotnet nuget update source github \
             --username osmaga2012 \
-            --password "${{ secrets['Token package'] }}" \
+            --password "${{ secrets.API_TOKEN_PACKAGE }}" \
             --store-password-in-clear-text \
             --configfile "$CONFIG_PATH"
       - name: Setup .NET
