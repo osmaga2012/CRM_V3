@@ -38,7 +38,7 @@ if [ ! -z "$API_TOKEN_GITHUB" ]; then
   <packageSourceCredentials>
     <github>
       <add key="Username" value="osmaga2012" />
-      <add key="ClearTextPassword" value="$API_TOKEN_GITHUB" />
+      <add key="ClearTextPassword" value="$API_TOKEN_PACKAGE" />
     </github>
   </packageSourceCredentials>
 </configuration>
