@@ -5,25 +5,28 @@ echo "=========================================="
 echo "Building Blazor WebAssembly Static Site"
 echo "=========================================="
 
-# 1. Instalar .NET SDK 10
+# 1. Instalar .NET SDK 10 y capturar la ruta de instalación
 echo "Installing .NET SDK 10..."
-curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 10.0.103
+# El script de instalación suele imprimir dónde se instaló
+INSTALL_DIR="/opt/render/project/dotnet"
+curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 10.0.103 --install-dir "$INSTALL_DIR"
 
-# 2. CONFIGURACIÓN CRÍTICA DEL PATH
-# Usamos rutas absolutas para evitar el "command not found"
-export DOTNET_ROOT=$HOME/.dotnet
-export PATH=$PATH:$HOME/.dotnet:$HOME/.dotnet/tools
+# 2. Configuración de rutas
+export DOTNET_ROOT="$INSTALL_DIR"
+export PATH="$PATH:$INSTALL_DIR:$INSTALL_DIR/tools"
 
-# Verificar instalación (con ruta completa por si acaso)
+# Verificar instalación
 echo "Verifying .NET installation..."
-$HOME/.dotnet/dotnet --version
+"$INSTALL_DIR/dotnet" --version
 
-# 3. CONFIGURACIÓN DE NUGET (Lo que arreglamos ayer)
-# Render necesita autenticarse igual que GitHub Actions
+# 3. Configuración de NuGet (Usando la lógica que nos funcionó)
 echo "Configuring NuGet for GitHub Packages..."
 CONFIG_PATH=$(find . -name "nuget.config" | head -n 1)
 
-# Si tienes el token en las variables de entorno de Render:
+if [ -z "$CONFIG_PATH" ]; then
+    CONFIG_PATH="./nuget.config"
+fi
+
 if [ ! -z "$API_TOKEN_GITHUB" ]; then
     cat <<EOF > "$CONFIG_PATH"
 <?xml version="1.0" encoding="utf-8"?>
@@ -35,24 +38,25 @@ if [ ! -z "$API_TOKEN_GITHUB" ]; then
   <packageSourceCredentials>
     <github>
       <add key="Username" value="osmaga2012" />
-      <add key="ClearTextPassword" value="$API_TOKEN_PACKAGE" />
+      <add key="ClearTextPassword" value="$API_TOKEN_GITHUB" />
     </github>
   </packageSourceCredentials>
 </configuration>
 EOF
-    echo "NuGet config updated with API_TOKEN_PACKAGE"
+    echo "NuGet config updated."
 fi
 
 # 4. Restaurar y Publicar
+# IMPORTANTE: Verifica si es CRM.V3.Web o CRM.V3.Web.Client
+PROJECT_PATH="CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj"
+
 echo "Restoring NuGet packages..."
-$HOME/.dotnet/dotnet restore CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj --configfile "$CONFIG_PATH"
+"$INSTALL_DIR/dotnet" restore "$PROJECT_PATH" --configfile "$CONFIG_PATH"
 
 echo "Publishing Blazor WebAssembly..."
-$HOME/.dotnet/dotnet publish CRM.V3/CRM.V3.Web/CRM.V3.Web.csproj -c Release -o publish /p:BlazorEnableCompression=false
+"$INSTALL_DIR/dotnet" publish "$PROJECT_PATH" -c Release -o publish /p:BlazorEnableCompression=false
 
 # 5. Post-procesamiento
-echo "Copying _redirects file..."
-# Asegúrate de que el archivo existe antes de copiarlo para evitar errores
 if [ -f "_redirects" ]; then
     cp _redirects publish/wwwroot/_redirects
 fi
