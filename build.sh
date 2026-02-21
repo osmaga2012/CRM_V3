@@ -15,36 +15,42 @@ curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 10.0.
 export DOTNET_ROOT="$INSTALL_DIR"
 export PATH="$PATH:$INSTALL_DIR:$INSTALL_DIR/tools"
 
+
+
 # Verificar instalación
 echo "Verifying .NET installation..."
 "$INSTALL_DIR/dotnet" --version
 
 # 3. Configuración de NuGet (Usando la lógica que nos funcionó)
 echo "Configuring NuGet for GitHub Packages..."
-CONFIG_PATH=$(find . -name "nuget.config" | head -n 1)
+#CONFIG_PATH=$(find . -name "nuget.config" | head -n 1)
+LOCAL_CONFIG=$(find . -name "nuget.config")
 
-if [ -z "$CONFIG_PATH" ]; then
-    CONFIG_PATH="./nuget.config"
+echo "Updating config at: $LOCAL_CONFIG"
+
+if [ -z "$LOCAL_CONFIG" ]; then
+    LOCAL_CONFIG="./nuget.config"
 fi
 
-if [ ! -z "$API_TOKEN_GITHUB" ]; then
-    cat <<EOF > "$CONFIG_PATH"
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
-    <add key="github" value="https://nuget.pkg.github.com/osmaga2012/index.json" />
-  </packageSources>
-  <packageSourceCredentials>
-    <github>
-      <add key="Username" value="osmaga2012" />
-      <add key="ClearTextPassword" value="$API_TOKEN_PACKAGE" />
-    </github>
-  </packageSourceCredentials>
-</configuration>
-EOF
-    echo "NuGet config updated."
-fi
+if [ ! -z "$API_TOKEN_PACKAGE" ]; then
+    cat <<EOF > "$LOCAL_CONFIG"
+    <?xml version="1.0" encoding="utf-8"?>
+    <configuration>
+      <packageSources>
+        <clear />
+        <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+        <add key="github" value="https://nuget.pkg.github.com/osmaga2012/index.json" />
+      </packageSources>
+      <packageSourceCredentials>
+        <github>
+          <add key="Username" value="osmaga2012" />
+          <add key="ClearTextPassword" value="$API_TOKEN_GITHUB" />
+        </github>
+      </packageSourceCredentials>
+    </configuration>
+    EOF
+        echo "NuGet config updated."
+    fi
 
 # 4. Instalación de Workloads (Necesario para WASM)
 echo "Installing WASM Workloads..."
