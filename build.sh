@@ -26,7 +26,7 @@ if [ -z "$LOCAL_CONFIG" ]; then
 fi
 
 # Aquí inyectamos tu token de descarga
-if [ ! -z "$API_TOKEN_PACKAGE" ]; then
+if [ ! -z "$API_GITHUB_PACKAGE" ]; then
 cat <<EOF > "$LOCAL_CONFIG"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
@@ -38,12 +38,12 @@ cat <<EOF > "$LOCAL_CONFIG"
   <packageSourceCredentials>
     <github>
       <add key="Username" value="osmaga2012" />
-      <add key="ClearTextPassword" value="$API_TOKEN_PACKAGE" />
+      <add key="ClearTextPassword" value="$API_GITHUB_PACKAGE" />
     </github>
   </packageSourceCredentials>
 </configuration>
 EOF
-    echo "NuGet config updated with API_TOKEN_PACKAGE."
+    echo "NuGet config updated with API_GITHUB_PACKAGE."
 else
     echo "ERROR: API_TOKEN_PACKAGE not found in environment variables."
     exit 1
