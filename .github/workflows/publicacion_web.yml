@@ -27,20 +27,27 @@ jobs:
           token: ${{ secrets.API_TOKEN_GITHUB }}
       - name: Configurar autenticación NuGet para GitHub Packages
         run: |
-          # 1. Encontrar el archivo
+          # 1. Localizar el archivo
           CONFIG_PATH=$(find . -name "nuget.config" | head -n 1)
           echo "CONFIG_PATH=$CONFIG_PATH" >> $GITHUB_ENV
-          
-          # 2. Limpiar las credenciales antiguas que causan el error de encriptación
-          # Esto borra toda la sección <packageSourceCredentials> para empezar de cero
-          sed -i '/<packageSourceCredentials>/,/<\/packageSourceCredentials>/d' "$CONFIG_PATH"
-          
-          # 3. Añadir las credenciales limpias usando el secreto correcto
-          dotnet nuget update source github \
-            --username osmaga2012 \
-            --password "${{ secrets.API_TOKEN_PACKAGE }}" \
-            --store-password-in-clear-text \
-            --configfile "$CONFIG_PATH"
+
+          # 2. Re-crear el archivo desde cero para asegurar que tiene TODO lo necesario
+          cat <<EOF > "$CONFIG_PATH"
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+              <add key="github" value="https://nuget.pkg.github.com/osmaga2012/index.json" />
+            </packageSources>
+            <packageSourceCredentials>
+              <github>
+                <add key="Username" value="osmaga2012" />
+                <add key="ClearTextPassword" value="${{ secrets.API_TOKEN_PACKAGE }}" />
+              </github>
+            </packageSourceCredentials>
+          </configuration>
+          EOF
+                    echo "Archivo nuget.config regenerado con éxito."
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
